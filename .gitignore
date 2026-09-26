@@ -1,0 +1,13 @@
+# Runtime data: customer personal data, admin password hash, secrets and content edited in the admin.
+/data/*
+!/data/.htaccess
+
+# Images uploaded through the admin.
+/uploads/*
+!/uploads/.htaccess
+
+# Editor and OS files
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
