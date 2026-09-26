@@ -1,0 +1,11 @@
+# Block git metadata and project files that are not part of the website.
+RedirectMatch 404 /\.git
+<FilesMatch "^(\.gitignore|README\.md|\.htaccess)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Deny from all
+    </IfModule>
+</FilesMatch>
+Options -Indexes
