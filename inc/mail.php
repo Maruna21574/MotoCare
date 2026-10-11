@@ -7,8 +7,12 @@ declare(strict_types=1);
 
 function siteUrl(string $path = ''): string
 {
+    global $local;
+    // A configured base_url (inc/local.php) is trusted; the Host header comes from the visitor and could be forged.
+    $configured = rtrim((string) ($local['base_url'] ?? ''), '/');
+    if ($configured !== '') return $configured . '/' . ltrim($path, '/');
     $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
-    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $host = preg_match('/^[a-z0-9.-]+(:\d{1,5})?$/i', (string) ($_SERVER['HTTP_HOST'] ?? '')) ? $_SERVER['HTTP_HOST'] : 'localhost';
     $root = str_replace('\\', '/', (string) realpath(dirname(__DIR__)));
     $docRoot = rtrim(str_replace('\\', '/', (string) realpath($_SERVER['DOCUMENT_ROOT'] ?? '')), '/');
     $base = ($docRoot !== '' && stripos($root, $docRoot) === 0) ? substr($root, strlen($docRoot)) : '';
@@ -29,7 +33,7 @@ function mailMessage(string $subject, string $title, string $greeting, string $i
     if ($rows !== []) $text .= "\n" . implode("\n", array_map(static fn (array $row): string => $row[0] . ': ' . $row[1], $rows)) . "\n";
     if ($button !== null) $text .= "\n" . $button[0] . ': ' . $button[1] . "\n";
     if ($outro !== '') $text .= "\n" . $outro . "\n";
-    $text .= "\n—\n{$site['name']}\n{$site['location']}\n{$site['phone']}\n{$site['email']}\n";
+    $text .= "\n—\n{$site['name']}\n{$site['location']}\n{$site['phone']}\n{$site['email']}\n" . (companyMailLine() !== '' ? companyMailLine() . "\n" : '');
 
     $esc = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
     $rowsHtml = '';
@@ -56,9 +60,18 @@ function mailMessage(string $subject, string $title, string $greeting, string $i
         . '<strong style="color:#0b0b0b;">' . $esc($site['name']) . '</strong><br>' . $esc($site['location']) . '<br>'
         . '<a href="tel:' . $esc(str_replace(' ', '', $site['phone'])) . '" style="color:#0b0b0b;">' . $esc($site['phone']) . '</a> · '
         . '<a href="mailto:' . $esc($site['email']) . '" style="color:#0b0b0b;">' . $esc($site['email']) . '</a>'
+        . (companyMailLine() !== '' ? '<br><span style="font-size:12px;color:#8a8984;">' . $esc(companyMailLine()) . '</span>' : '')
         . '</td></tr></table></td></tr></table></body></html>';
 
     return ['subject' => $subject, 'html' => $html, 'text' => $text];
+}
+
+/** Company line for the e-mail footer, e.g. "NERION GROUP s. r. o. · Kollárova 85, 036 01 Martin · IČO 56225890". */
+function companyMailLine(): string
+{
+    global $site;
+    $parts = array_filter([trim((string) ($site['company_name'] ?? '')), trim((string) ($site['company_seat'] ?? '')), !empty($site['company_ico']) ? 'IČO ' . $site['company_ico'] : '']);
+    return implode(' · ', $parts);
 }
 
 function sendMail(string $to, array $message, ?string $replyTo = null): bool
@@ -126,9 +139,9 @@ function bookingMail(array $booking, string $type, string $note = ''): ?array
         case 'changed':
             return mailMessage('Zmena rezervácie ' . $id, 'Rezervácia upravená', $greeting, 'upravili sme tvoju rezerváciu. Aktuálne údaje nájdeš nižšie.', $rows, $note, null, $call);
         case 'cancelled':
-            return mailMessage('Rezervácia ' . $id . ' bola zrušená', 'Rezervácia zrušená', $greeting, 'tvoja rezervácia bola zrušená. Ak si chceš vybrať iný termín, urobíš to online za minútu.', $rows, $note, ['Vybrať nový termín', siteUrl('rezervacia.php')]);
+            return mailMessage('Rezervácia ' . $id . ' bola zrušená', 'Rezervácia zrušená', $greeting, 'tvoja rezervácia bola zrušená. Ak si chceš vybrať iný termín, urobíš to online za minútu.', $rows, $note, ['Vybrať nový termín', siteUrl('rezervacia')]);
         case 'done':
-            return mailMessage('Ďakujeme za návštevu MotoCare Pro', 'Hotovo, ďakujeme', $greeting, 'ďakujeme, že si nám zveril svoju motorku. Ak budeš mať otázky k údržbe, kedykoľvek sa ozvi. Radi ťa uvidíme znova.', [['Služba', $booking['service_name']], ['Termín', ucfirst(formatDateSk($booking['date']))]], $note, ['Rezervovať ďalší termín', siteUrl('rezervacia.php')]);
+            return mailMessage('Ďakujeme za návštevu MotoCare Pro', 'Hotovo, ďakujeme', $greeting, 'ďakujeme, že si nám zveril svoju motorku. Ak budeš mať otázky k údržbe, kedykoľvek sa ozvi. Radi ťa uvidíme znova.', [['Služba', $booking['service_name']], ['Termín', ucfirst(formatDateSk($booking['date']))]], $note, ['Rezervovať ďalší termín', siteUrl('rezervacia')]);
     }
     return null;
 }
@@ -190,7 +203,7 @@ function orderMail(array $order, string $type, string $note = ''): ?array
         case 'shipped':
             return mailMessage('Objednávka ' . $id . ' je na ceste', 'Objednávka odoslaná', $greeting, 'tvoja objednávka je odoslaná. Zaplatíš pri prevzatí.', $rows, $note);
         case 'done':
-            return mailMessage('Ďakujeme za nákup – ' . $id, 'Objednávka vybavená', $greeting, 'tvoja objednávka je vybavená. Ďakujeme za nákup a nech ti produkty dobre slúžia.', $rows, $note, ['Pozrieť ďalšie produkty', siteUrl('shop.php')]);
+            return mailMessage('Ďakujeme za nákup – ' . $id, 'Objednávka vybavená', $greeting, 'tvoja objednávka je vybavená. Ďakujeme za nákup a nech ti produkty dobre slúžia.', $rows, $note, ['Pozrieť ďalšie produkty', siteUrl('shop')]);
         case 'cancelled':
             return mailMessage('Objednávka ' . $id . ' bola zrušená', 'Objednávka zrušená', $greeting, 'tvoja objednávka bola zrušená. Ak ide o omyl, stačí odpovedať na tento e-mail.', $rows, $note);
     }

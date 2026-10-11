@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/inc/config.php';
-$selectedService = cleanText($_GET['service'] ?? '', 40);
+$selectedService = cleanText($_GET['service'] ?? '', 80);
 if (!isset($services[$selectedService])) $selectedService = '';
 $pageTitle = 'Rezervácia termínu — MotoCare Pro';
 $activePage = 'rezervacia';

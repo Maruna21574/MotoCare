@@ -9,19 +9,27 @@ $site = [
     'phone' => '+421 907 622 954',
     'facebook' => 'https://www.facebook.com/profile.php?id=61586104985065&locale=sk_SK',
     'instagram' => 'https://www.instagram.com/motocare_pro/',
-    'street' => 'Kollárova',
+    'street' => 'Kollárova 85',
     'zip' => '036 01',
     'city' => 'Martin',
     'country' => 'Slovensko',
     'tagline' => 'Ochrana a starostlivosť, ktorá nerieši len vzhľad.',
     'description' => 'MotoCare Pro Martin — profesionálna starostlivosť o motocykle, ochrana, korekcia laku a príprava na sezónu.',
+    // Company behind the brand (shown in the footer, the privacy policy and e-mails).
+    'company_name' => 'NERION GROUP s. r. o.',
+    'company_seat' => 'Kollárova 85, 036 01 Martin',
+    'company_ico' => '56225890',
+    'company_dic' => '2122259876',
+    'company_vat' => 'Nie je platiteľom DPH',
+    'company_registry' => 'Okresný súd Žilina, oddiel Sro, vložka č. 85105/L',
+    'company_manager' => 'Ján Nezdoba',
     'map_embed' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5372.8868691143325!2d18.910572677987407!3d49.04974277135866!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4714fec04ad3fd23%3A0xd2e31076100f425c!2sKoll%C3%A1rova!5e1!3m2!1ssk!2ssk!4v1789848916878!5m2!1ssk!2ssk',
 ];
 // Site details, services, products, gallery and page texts below are defaults; the admin saves its edits to data/*.json (see content.php).
 
 $services = [
     'easy-care' => [
-        'image' => 'img/web/pexels-kevin-bruhn-2160372194-36709685.webp',
+        'image' => 'img/web/sluzba-zakladna-starostlivost.webp',
         'name' => 'Základná starostlivosť', 'price' => 129, 'minutes' => 120,
         'label' => 'Perfektný základ', 'short' => 'Čistý a svieži základ pre každú ďalšiu jazdu.',
         'description' => 'Keď chceš mať motorku čistú, sviežu a pripravenú na ďalšiu jazdu. Bez skratiek, s dôrazom na detaily, ktoré bežné umytie vynechá.',
@@ -29,7 +37,7 @@ $services = [
         'details' => ['Predumytie a bezpečné odstránenie nečistôt', 'Čistenie diskov, reťaze, spojov a detailov', 'Ošetrenie plastov, pneumatík a exponovaných povrchov', 'Finálna kontrola a odporúčania pre domácu údržbu'],
     ],
     'protect' => [
-        'image' => 'img/web/pexels-vanyaoboleninov-4513014.webp',
+        'image' => 'img/web/sluzba-ochrana.webp',
         'name' => 'Ochrana', 'price' => 349, 'minutes' => 240,
         'label' => 'Viac ochrany', 'short' => 'Kompletné čistenie a ochranné vrstvy pre pokojnejšie kilometre.',
         'description' => 'Kompletné čistenie a ochranné vrstvy pre motorku, ktorá jazdí v reálnych podmienkach a potrebuje viac než len pekný lesk.',
@@ -37,7 +45,7 @@ $services = [
         'details' => ['Všetko zo služby Základná starostlivosť', 'Chemická a mechanická dekontaminácia povrchov', 'Ochrana laku, plastov, kovov a kolies', 'Odovzdanie s konkrétnym plánom ďalšej údržby'],
     ],
     'transform' => [
-        'image' => 'img/web/max-itin-7GeprSfVqLQ-unsplash.webp',
+        'image' => 'img/web/sluzba-premena.webp',
         'name' => 'Premena', 'price' => 690, 'minutes' => 480,
         'label' => 'Najobľúbenejšia služba', 'badge' => 'Najžiadanejšie', 'short' => 'Viditeľná premena, korekcia laku a ochrana s dlhodobým zmyslom.',
         'description' => 'Služba pre motorku, pri ktorej chceš vidieť skutočný rozdiel. Korekcia laku, hĺbka, ochrana a jednoduchšia údržba.',
@@ -96,7 +104,11 @@ $sliderSkip = [
     'BMW%20R1200%20GS/748044221_17881632879655565_7110101881806191312_n.jpg',
 ];
 
-$dataDir = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'data';
+// Optional per-server settings in inc/local.php (not in git), see inc/local.example.php:
+// 'data_dir' keeps customer data outside the web root, 'base_url' is the public address used in e-mail links.
+$local = is_file(__DIR__ . '/local.php') ? (require __DIR__ . '/local.php') : [];
+$local = is_array($local) ? $local : [];
+$dataDir = rtrim((string) ($local['data_dir'] ?? ''), '/\\') ?: dirname(__DIR__) . DIRECTORY_SEPARATOR . 'data';
 $bookingsFile = $dataDir . DIRECTORY_SEPARATOR . 'bookings.json';
 $ordersFile = $dataDir . DIRECTORY_SEPARATOR . 'orders.json';
 $contactMessagesFile = $dataDir . DIRECTORY_SEPARATOR . 'contact-messages.json';
@@ -118,22 +130,49 @@ function readJsonFile(string $file): array
     return is_array($decoded) ? $decoded : [];
 }
 
-function saveJsonFile(string $file, array $data): bool
+/** Writes a file in one step (temporary file + rename), so a crash or a full disk never leaves half a file behind. */
+function writeFileAtomic(string $file, string $contents): bool
+{
+    $temporary = $file . '.' . bin2hex(random_bytes(4)) . '.tmp';
+    if (file_put_contents($temporary, $contents) !== strlen($contents)) { @unlink($temporary); return false; }
+    for ($try = 0; $try < 5; $try++) {
+        if (@rename($temporary, $file)) return true;
+        usleep(40000); // Windows may briefly refuse to replace a file that a reader has open.
+    }
+    @unlink($temporary);
+    return false;
+}
+
+function encodeJsonFile(array $data): string
+{
+    $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+    if ($json === false) throw new RuntimeException('Data cannot be encoded as JSON.');
+    return $json;
+}
+
+/** Locks a data file for writers (the lock lives in a separate file because the data file itself is replaced on every write). */
+function lockJsonFile(string $file)
 {
     $directory = dirname($file);
-    if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) return false;
-    $handle = fopen($file, 'c+');
-    if ($handle === false) return false;
-    $saved = false;
-    if (flock($handle, LOCK_EX)) {
-        ftruncate($handle, 0);
-        rewind($handle);
-        $saved = fwrite($handle, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) !== false;
-        fflush($handle);
-        flock($handle, LOCK_UN);
+    if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) throw new RuntimeException('Data directory is not writable.');
+    $handle = fopen($file . '.lock', 'c');
+    if ($handle === false || !flock($handle, LOCK_EX)) throw new RuntimeException('Data file is not writable.');
+    return $handle;
+}
+
+function saveJsonFile(string $file, array $data): bool
+{
+    try {
+        $lock = lockJsonFile($file);
+        try {
+            return writeFileAtomic($file, encodeJsonFile($data));
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
+    } catch (RuntimeException $exception) {
+        return false;
     }
-    fclose($handle);
-    return $saved;
 }
 
 function cleanText($value, int $maxLength = 255): string
@@ -168,25 +207,29 @@ function bookingOverlap(int $start, int $duration, int $otherStart, int $otherDu
  * Read-modify-write a JSON file under one exclusive lock, so two parallel requests
  * (e.g. two customers booking the same slot) cannot overwrite each other.
  * $callback receives the current data by reference and may return any result value.
+ * A file that exists but is not valid JSON is never overwritten: it is copied to
+ * "<name>.corrupt-<time>" and a RuntimeException is thrown instead of starting from empty data.
  */
 function updateJsonFile(string $file, callable $callback)
 {
-    $directory = dirname($file);
-    if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) throw new RuntimeException('Data directory is not writable.');
-    $handle = fopen($file, 'c+');
-    if ($handle === false || !flock($handle, LOCK_EX)) throw new RuntimeException('Data file is not writable.');
+    $lock = lockJsonFile($file);
     try {
-        $decoded = json_decode(stream_get_contents($handle) ?: '[]', true);
-        $data = is_array($decoded) ? $decoded : [];
+        $raw = is_file($file) ? (string) file_get_contents($file) : '';
+        $data = [];
+        if (trim($raw) !== '') {
+            $decoded = json_decode($raw, true);
+            if (!is_array($decoded)) {
+                @copy($file, $file . '.corrupt-' . date('Ymd-His'));
+                throw new RuntimeException('Data file is corrupted: ' . basename($file));
+            }
+            $data = $decoded;
+        }
         $result = $callback($data);
-        ftruncate($handle, 0);
-        rewind($handle);
-        fwrite($handle, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        fflush($handle);
+        if (!writeFileAtomic($file, encodeJsonFile($data))) throw new RuntimeException('Data file is not writable.');
         return $result;
     } finally {
-        flock($handle, LOCK_UN);
-        fclose($handle);
+        flock($lock, LOCK_UN);
+        fclose($lock);
     }
 }
 
@@ -196,13 +239,20 @@ function newId(string $prefix): string
 }
 
 /** Price per 100 ml, e.g. "5,20 € / 100 ml"; empty when the product has no volume. */
+/** Products without a price yet (price 0) are shown as "Cena čoskoro" and cannot be ordered. */
+function productPriced(array $product): bool
+{
+    return (float) ($product['price'] ?? 0) > 0;
+}
+
 function productUnitPrice(array $product): string
 {
     $volume = (int) ($product['volume'] ?? 0);
-    return $volume > 0 ? number_format($product['price'] / $volume * 100, 2, ',', ' ') . ' € / 100 ml' : '';
+    return $volume > 0 && productPriced($product) ? number_format($product['price'] / $volume * 100, 2, ',', ' ') . ' € / 100 ml' : '';
 }
 
 require_once __DIR__ . '/booking.php';
 require_once __DIR__ . '/mail.php';
 require_once __DIR__ . '/content.php';
 require_once __DIR__ . '/spam.php';
+require_once __DIR__ . '/seo.php';

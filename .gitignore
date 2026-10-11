@@ -11,3 +11,10 @@
 .idea/
 Thumbs.db
 .DS_Store
+
+# Photo/video imports waiting to be added to the gallery (hundreds of MB).
+/moto-*/
+/galeria-import/
+
+# Per-server settings (data folder location, public address).
+/inc/local.php

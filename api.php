@@ -145,9 +145,9 @@ if ($action === 'shop_order' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $items = [];
     $total = 0;
     foreach ($cart as $item) {
-        $id = cleanText($item['id'] ?? '', 50);
+        $id = cleanText($item['id'] ?? '', 80);
         $quantity = max(1, min(10, (int) ($item['quantity'] ?? 1)));
-        if (!isset($products[$id])) continue;
+        if (!isset($products[$id]) || !productPriced($products[$id])) continue;
         $items[] = ['id' => $id, 'name' => $products[$id]['name'], 'quantity' => $quantity, 'price' => $products[$id]['price']];
         $total += $products[$id]['price'] * $quantity;
     }

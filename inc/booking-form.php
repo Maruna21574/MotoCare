@@ -28,7 +28,7 @@
             </label>
             <?php endforeach; ?>
         </div>
-        <div class="book-nav"><a class="book-back" href="sluzby.php">Porovnať služby</a><button class="button button--orange" type="button" data-next>Pokračovať</button></div>
+        <div class="book-nav"><a class="book-back" href="sluzby">Porovnať služby</a><button class="button button--orange" type="button" data-next>Pokračovať</button></div>
     </div>
 
     <div class="book-panel" data-panel="2" hidden>
@@ -74,7 +74,7 @@
         <label class="book-option book-consent">
             <input type="checkbox" name="consent" value="1" required>
             <span class="book-option-box" aria-hidden="true"></span>
-            <span class="book-option-text">Súhlasím so <a href="gdpr.php" target="_blank">spracovaním osobných údajov</a> za účelom vybavenia rezervácie.</span>
+            <span class="book-option-text">Súhlasím so <a href="gdpr" target="_blank">spracovaním osobných údajov</a> za účelom vybavenia rezervácie.</span>
         </label>
         <p class="form-message" id="book-message" role="status" aria-live="polite"></p>
         <div class="book-nav"><button class="book-back" type="button" data-prev>Späť</button><button class="button button--orange" type="submit">Odoslať rezerváciu</button></div>
@@ -84,6 +84,6 @@
         <span class="book-done-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 12.5 4 4 8-9"></path></svg></span>
         <h2 class="book-title">Ďakujeme, máme to.</h2>
         <p id="book-done-text"></p>
-        <div class="book-done-actions"><a class="button button--orange" href="index.php">Späť na úvod</a><a class="book-back" href="sluzby.php">Pozrieť služby</a></div>
+        <div class="book-done-actions"><a class="button button--orange" href="./">Späť na úvod</a><a class="book-back" href="sluzby">Pozrieť služby</a></div>
     </div>
 </form>

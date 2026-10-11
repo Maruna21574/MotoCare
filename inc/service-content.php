@@ -1,5 +1,5 @@
 <?php
-// Extended copy for service detail pages (sluzba.php): longer description, reasons and who the service is for.
+// Extended copy for service detail pages (sluzba): longer description, reasons and who the service is for.
 // Merged into $services in config.php by service id.
 
 return [

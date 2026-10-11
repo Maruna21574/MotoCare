@@ -1,5 +1,5 @@
 <?php
-// Extended copy for product detail pages (produkt.php): longer description and how to use it.
+// Extended copy for product detail pages (produkt): longer description and how to use it.
 // Merged into $products in config.php by product id.
 
 return [

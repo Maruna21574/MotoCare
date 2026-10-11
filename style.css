@@ -44,7 +44,7 @@ img { max-width: 100%; display: block; }
 .contact-bar-social svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; }
 .contact-bar-social svg path { fill: currentColor; stroke: none; }
 .contact-bar-social .social-dot { fill: currentColor; stroke: none; }
-.contact-bar-social:hover { border-color: var(--orange) !important; background: var(--orange); color: var(--black); }
+.announcement .contact-bar-social:hover { border-color: var(--orange) !important; background: var(--orange); color: #fff; }
 .pulse-dot { width: 7px; height: 7px; background: var(--black); border-radius: 50%; box-shadow: 0 0 0 5px rgba(6,6,6,.12); }
 .site-header { position: sticky; top: 0; z-index: 20; background: rgba(6,6,6,.91); border-bottom: 1px solid var(--line-dark); backdrop-filter: blur(16px); }
 .home-page .site-header { margin-bottom: -82px; background: transparent; border-bottom-color: transparent; backdrop-filter: none; transition: background .3s ease, border-color .3s ease, backdrop-filter .3s ease; }

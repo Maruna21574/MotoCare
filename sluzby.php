@@ -30,7 +30,7 @@ include __DIR__ . '/inc/header.php';
 <section class="svc-cta section-orange">
     <div class="container svc-cta-inner">
         <div><p class="svc-cta-kicker"><?= t('services.cta_kicker') ?></p><h2><?= t('services.cta_title') ?></h2><p><?= t('services.cta_text') ?></p></div>
-        <div class="svc-cta-actions"><a class="button button--dark" href="kontakt.php">Napísať nám</a><a class="svc-cta-phone" href="<?= e(phoneHref()) ?>"><?= e($site['phone']) ?></a></div>
+        <div class="svc-cta-actions"><a class="button button--dark" href="kontakt">Napísať nám</a><a class="svc-cta-phone" href="<?= e(phoneHref()) ?>"><?= e($site['phone']) ?></a></div>
     </div>
 </section>
 <?php include __DIR__ . '/inc/footer.php'; ?>

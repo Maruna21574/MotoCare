@@ -24,7 +24,7 @@ $steps = tl('about.steps');
             <h2><?= t('about.intro_title') ?></h2>
             <p class="about-lead"><?= t('about.intro_lead') ?></p>
             <?= t('about.intro_body') ?>
-            <div class="about-intro-actions"><a class="button button--orange" href="rezervacia.php">Rezervovať termín</a><a class="svc-link" href="sluzby.php">Pozrieť služby <span aria-hidden="true">→</span></a></div>
+            <div class="about-intro-actions"><a class="button button--orange" href="rezervacia">Rezervovať termín</a><a class="svc-link" href="sluzby">Pozrieť služby <span aria-hidden="true">→</span></a></div>
         </div>
         <div class="about-collage reveal">
             <img class="about-collage-main" loading="lazy" src="<?= t('about.collage_main') ?>" alt="Motocykel po starostlivosti MotoCare Pro">
@@ -60,15 +60,15 @@ $steps = tl('about.steps');
 </section>
 
 <section class="about-strip section-dark">
-    <div class="about-strip-grid"><?php for ($i = 1; $i <= 4; $i++): ?><a href="galeria.php"><img loading="lazy" src="<?= t('about.strip_image_' . $i) ?>" alt="Ukážka z galérie MotoCare Pro"></a><?php endfor; ?></div>
-    <div class="container about-strip-cta"><p><?= t('about.strip_text') ?></p><a class="button button--orange" href="galeria.php">Otvoriť galériu</a></div>
+    <div class="about-strip-grid"><?php for ($i = 1; $i <= 4; $i++): ?><a href="galeria"><img loading="lazy" src="<?= t('about.strip_image_' . $i) ?>" alt="Ukážka z galérie MotoCare Pro"></a><?php endfor; ?></div>
+    <div class="container about-strip-cta"><p><?= t('about.strip_text') ?></p><a class="button button--orange" href="galeria">Otvoriť galériu</a></div>
 </section>
 
 <section class="about-contact section-light">
     <div class="container">
         <div class="about-contact-card">
             <div><p class="overline"><?= t('about.contact_overline') ?></p><h2><?= t('about.contact_title') ?></h2><p><?= t('about.contact_text') ?></p></div>
-            <div class="about-contact-actions"><a class="button button--orange" href="kontakt.php">Napísať správu</a><a class="about-contact-phone" href="<?= e(phoneHref()) ?>"><?= e($site['phone']) ?></a></div>
+            <div class="about-contact-actions"><a class="button button--orange" href="kontakt">Napísať správu</a><a class="about-contact-phone" href="<?= e(phoneHref()) ?>"><?= e($site['phone']) ?></a></div>
         </div>
     </div>
 </section>
