@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/inc/config.php';
-$slug = cleanText($_GET['slug'] ?? '', 40);
-if (!isset($products[$slug])) { header('Location: shop.php'); exit; }
+$slug = cleanText($_GET['slug'] ?? '', 80);
+if (!isset($products[$slug])) { header('Location: shop'); exit; }
 $product = $products[$slug];
 $pageTitle = $product['name'] . ' — MotoCare produkty';
 $activePage = 'shop';
@@ -16,7 +16,7 @@ $perkIcons = [
 ?>
 <section class="pd section-light">
     <div class="container">
-        <nav class="pd-crumbs" aria-label="Omrvinková navigácia"><a href="index.php">Domov</a><span aria-hidden="true">/</span><a href="shop.php">Produkty</a><span aria-hidden="true">/</span><span aria-current="page"><?= e($product['name']) ?></span></nav>
+        <nav class="pd-crumbs" aria-label="Omrvinková navigácia"><a href="./">Domov</a><span aria-hidden="true">/</span><a href="shop">E-shop</a><span aria-hidden="true">/</span><span aria-current="page"><?= e($product['name']) ?></span></nav>
         <div class="pd-grid">
             <div class="pd-media">
                 <img src="<?= e($product['image']) ?>" alt="<?= e($product['name']) ?>">
@@ -26,17 +26,25 @@ $perkIcons = [
                 <p class="shop-card-brand"><?= e($product['brand'] ?? '') ?></p>
                 <h1><?= e($product['name']) ?></h1>
                 <p class="pd-lead"><?= e($product['description']) ?></p>
+                <?php if (productPriced($product)): ?>
                 <div class="pd-price"><strong><?= (int) $product['price'] ?> €</strong><?php if (productUnitPrice($product) !== ''): ?><span><?= e(productUnitPrice($product)) ?></span><?php endif; ?></div>
+                <?php else: ?>
+                <div class="pd-price pd-price--soon"><strong>Cena čoskoro</strong><span>Aktuálnu cenu ti radi potvrdíme.</span></div>
+                <?php endif; ?>
                 <ul class="shop-card-specs pd-specs">
                     <?php if (!empty($product['brand'])): ?><li><small>Značka</small><b><?= e($product['brand']) ?></b></li><?php endif; ?>
                     <?php if (!empty($product['volume'])): ?><li><small>Objem</small><b><?= (int) $product['volume'] ?> ml</b></li><?php endif; ?>
                     <?php if (!empty($product['form'])): ?><li><small>Balenie</small><b><?= e($product['form']) ?></b></li><?php endif; ?>
                 </ul>
+                <?php if (productPriced($product)): ?>
                 <div class="pd-add">
                     <div class="pd-qty"><button type="button" data-quantity="minus" aria-label="Menej kusov">−</button><span id="product-quantity">1</span><button type="button" data-quantity="plus" aria-label="Viac kusov">+</button></div>
                     <button class="button button--orange add-product pd-add-button" type="button" data-product-id="<?= e($slug) ?>" data-product-name="<?= e($product['name']) ?>" data-product-price="<?= (int) $product['price'] ?>" data-quantity-target="product-quantity">Pridať do košíka</button>
                 </div>
-                <a class="shop-card-detail" href="kosik.php">Zobraziť košík <span aria-hidden="true">→</span></a>
+                <?php else: ?>
+                <div class="pd-add"><a class="button button--orange pd-add-button" href="kontakt">Spýtať sa na cenu</a><a class="button button--dark" href="<?= e(phoneHref()) ?>">Zavolať</a></div>
+                <?php endif; ?>
+                <a class="shop-card-detail" href="kosik">Zobraziť košík <span aria-hidden="true">→</span></a>
                 <ul class="pd-perks">
                     <?php foreach (tl('product.perks') as $index => [$title, $text]): $icon = $perkIcons[$index % count($perkIcons)]; ?><li><span><svg viewBox="0 0 24 24" aria-hidden="true"><?= $icon ?></svg></span><div><b><?= e($title) ?></b><small><?= e($text) ?></small></div></li><?php endforeach; ?>
                 </ul>
@@ -67,9 +75,13 @@ $perkIcons = [
 <?php if ($related !== []): ?>
 <section class="pd-related section-light">
     <div class="container">
-        <div class="section-heading"><div><p class="overline"><?= t('product.related_overline') ?></p><h2><?= t('product.related_title') ?></h2></div><a class="underlined-link" href="shop.php">Všetky produkty</a></div>
-        <div class="shop-cards">
-            <?php foreach ($related as $id => $product) include __DIR__ . '/inc/product-card.php'; ?>
+        <div class="section-heading"><div><p class="overline"><?= t('product.related_overline') ?></p><h2><?= t('product.related_title') ?></h2></div><a class="underlined-link" href="shop">Všetky produkty</a></div>
+        <div class="pd-slider" data-slider>
+            <button class="pd-slider-arrow pd-slider-arrow--prev" type="button" data-slider-prev aria-label="Predchádzajúce produkty"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"></path></svg></button>
+            <div class="shop-cards pd-slider-track" data-slider-track>
+                <?php foreach ($related as $id => $product) include __DIR__ . '/inc/product-card.php'; ?>
+            </div>
+            <button class="pd-slider-arrow pd-slider-arrow--next" type="button" data-slider-next aria-label="Ďalšie produkty"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg></button>
         </div>
     </div>
 </section>

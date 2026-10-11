@@ -138,6 +138,7 @@ function renderHeader(string $title, string $active = ''): void
         'orders' => ['Objednávky', $counts['orders'] ?? 0],
         'messages' => ['Správy', $counts['messages'] ?? 0],
         'products' => ['Produkty', 0],
+        'frames' => ['Rámy', 0],
         'services' => ['Služby', 0],
         'gallery' => ['Galéria', 0],
         'texts' => ['Texty', 0],

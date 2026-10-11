@@ -10,10 +10,11 @@ $benefitIcons = [
     '<path d="M4 5h16v11H9l-5 4z"></path><path d="M8 9.5h8M8 12.5h5"></path>',
 ];
 ?>
-<?php $hero = ['title' => t('shop.hero_title'), 'text' => textRaw('shop.hero_text'), 'crumbs' => [['Produkty', null]], 'video' => '5052771']; include __DIR__ . '/inc/page-hero.php'; ?>
+<?php $hero = ['title' => t('shop.hero_title'), 'text' => textRaw('shop.hero_text'), 'crumbs' => [['E-shop', null]], 'video' => '5052771']; include __DIR__ . '/inc/page-hero.php'; ?>
 
 <section class="shop-list section-light">
     <div class="container">
+        <?php $shopTab = "care"; include __DIR__ . "/inc/shop-switch.php"; ?>
         <div class="svc-intro">
             <p class="overline"><?= t('shop.intro_overline') ?></p>
             <p><?= t('shop.intro_text') ?></p>
@@ -23,6 +24,7 @@ $benefitIcons = [
         </div>
     </div>
 </section>
+
 
 <section class="shop-benefits-v2 section-light">
     <div class="container">

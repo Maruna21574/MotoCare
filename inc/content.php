@@ -17,15 +17,90 @@ if (is_file($productsFile)) $products = readJsonFile($productsFile);
 $allProducts = $products;
 $products = array_filter($products, static fn (array $product): bool => empty($product['hidden']));
 
+/**
+ * Photos of a frames category that ship with the site in produkty/ramy/<key>/ (web paths, sorted by name).
+ * Resized copies from the old site (-150x150, -720x380) are skipped when the original is there.
+ */
+function frameFolderPhotos(string $key): array
+{
+    $dir = dirname(__DIR__) . '/produkty/ramy/' . $key;
+    $files = is_dir($dir) ? scandir($dir) : [];
+    $photos = [];
+    foreach ($files as $file) {
+        if (!preg_match('/\.(webp|jpe?g|png|avif)$/i', $file)) continue;
+        if (preg_match('/^(.+)-\d+x\d+(\.[a-z0-9]+)$/i', $file, $match) && (in_array($match[1] . $match[2], $files, true) || str_contains($file, '-150x150.'))) continue;
+        $photos[] = ['src' => 'produkty/ramy/' . $key . '/' . $file];
+    }
+    return $photos;
+}
+
+// Frames and stands categories: [slug => ['title', 'text', 'photos' => [['src', 'thumb'?], ...], 'hidden']].
+// Until the admin saves them, the defaults from inc/frames.php and the photos in produkty/ramy/ are used.
+$framesFile = $dataDir . DIRECTORY_SEPARATOR . 'frames.json';
+if (is_file($framesFile)) {
+    $allFrames = readJsonFile($framesFile);
+} else {
+    $allFrames = [];
+    foreach (require __DIR__ . '/frames.php' as $key => $category) {
+        $allFrames[$key] = ['title' => $category['title'], 'text' => $category['text'], 'photos' => frameFolderPhotos($key), 'hidden' => false];
+    }
+}
+$frames = array_filter($allFrames, static fn (array $category): bool => empty($category['hidden']));
+
 if (is_file($galleryFile)) {
     $gallery = readJsonFile($galleryFile);
 } else {
     $gallery = array_map(static fn (string $src): array => ['src' => $src, 'slider' => !in_array($src, $sliderSkip, true)], $galleryImages);
 }
 $galleryImages = array_column($gallery, 'src');
-$sliderImages = array_column(array_filter($gallery, static fn (array $item): bool => !empty($item['slider'])), 'src');
+$sliderItems = array_values(array_filter($gallery, static fn (array $item): bool => !empty($item['slider'])));
+$sliderImages = array_column($sliderItems, 'src');
 
-/** One-line address, e.g. "Kollárova, 036 01 Martin". */
+/** Motorcycles that have photos in the gallery as slug => ['label', 'count'], in order of first appearance. */
+function galleryBikes(array $gallery): array
+{
+    $bikes = [];
+    foreach ($gallery as $item) {
+        $label = trim((string) ($item['bike'] ?? ''));
+        if ($label === '') continue;
+        $slug = slugify($label);
+        $bikes[$slug] ??= ['label' => $label, 'count' => 0];
+        $bikes[$slug]['count']++;
+    }
+    uasort($bikes, static fn (array $a, array $b): int => strnatcasecmp($a['label'], $b['label']));
+    return $bikes;
+}
+
+/** Company details as [label, value] rows; empty values are left out. */
+function companyDetails(): array
+{
+    global $site;
+    $rows = [
+        ['Obchodné meno', $site['company_name'] ?? ''],
+        ['Sídlo', $site['company_seat'] ?? ''],
+        ['IČO', $site['company_ico'] ?? ''],
+        ['DIČ', $site['company_dic'] ?? ''],
+        ['DPH', $site['company_vat'] ?? ''],
+        ['Zápis v registri', $site['company_registry'] ?? ''],
+        ['Konateľ', $site['company_manager'] ?? ''],
+    ];
+    return array_values(array_filter($rows, static fn (array $row): bool => trim((string) $row[1]) !== ''));
+}
+
+/** Company in running text, e.g. "NERION GROUP s. r. o., so sídlom Kollárova 85, 036 01 Martin, IČO: 56225890". */
+function companyIntro(): string
+{
+    global $site;
+    $name = trim((string) ($site['company_name'] ?? ''));
+    if ($name === '') return (string) $site['name'];
+    $parts = [$name];
+    if (trim((string) ($site['company_seat'] ?? '')) !== '') $parts[] = 'so sídlom ' . $site['company_seat'];
+    if (trim((string) ($site['company_ico'] ?? '')) !== '') $parts[] = 'IČO: ' . $site['company_ico'];
+    if (trim((string) ($site['company_registry'] ?? '')) !== '') $parts[] = 'zapísaná v Obchodnom registri (' . $site['company_registry'] . ')';
+    return implode(', ', $parts);
+}
+
+/** One-line address, e.g. "Kollárova 85, 036 01 Martin". */
 function siteAddress(): string
 {
     global $site;
@@ -73,6 +148,8 @@ function textPlaceholders(string $html): string
         '{phone}' => '<a href="' . e(phoneHref()) . '">' . e($site['phone']) . '</a>',
         '{email}' => '<a href="mailto:' . e($site['email']) . '">' . e($site['email']) . '</a>',
         '{address}' => e(siteAddress()),
+        '{company}' => e(companyIntro()),
+        '{name}' => e($site['name']),
     ]);
 }
 
@@ -172,10 +249,34 @@ function uploadedFiles(string $field): array
 /** Deletes a file from uploads/ when nothing references it any more (images shipped with the site are never deleted). */
 function deleteUploadIfUnused(string $path): void
 {
-    global $uploadsDir, $productsFile, $servicesFile, $galleryFile, $textsFile;
+    global $uploadsDir, $productsFile, $servicesFile, $galleryFile, $textsFile, $framesFile;
     if (!preg_match('#^uploads/[a-z0-9-]+\.(jpg|png|webp|gif)$#', $path)) return;
-    foreach ([$productsFile, $servicesFile, $galleryFile, $textsFile] as $file) {
+    foreach ([$productsFile, $servicesFile, $galleryFile, $textsFile, $framesFile] as $file) {
         if (is_file($file) && str_contains((string) file_get_contents($file), $path)) return;
     }
     @unlink($uploadsDir . DIRECTORY_SEPARATOR . basename($path));
+}
+
+/**
+ * Creates a small preview of an uploaded gallery image in uploads/t/ and returns its web path
+ * (e.g. "uploads/t/galeria-abc.webp"), or null when the image cannot be processed.
+ * The gallery grid shows these previews; the lightbox loads the full image.
+ */
+function makeGalleryThumb(string $webPath, int $width = 640): ?string
+{
+    global $uploadsDir;
+    if (!preg_match('#^uploads/([a-z0-9-]+)\.(jpg|png|webp|gif)$#', $webPath, $match) || !extension_loaded('gd') || !function_exists('imagewebp')) return null;
+    $file = $uploadsDir . DIRECTORY_SEPARATOR . basename($webPath);
+    $loader = ['jpg' => 'imagecreatefromjpeg', 'png' => 'imagecreatefrompng', 'webp' => 'imagecreatefromwebp', 'gif' => 'imagecreatefromgif'][$match[2]];
+    if (!is_file($file) || !function_exists($loader)) return null;
+    $image = @$loader($file);
+    if ($image === false) return null;
+    $thumbDir = $uploadsDir . DIRECTORY_SEPARATOR . 't';
+    $thumbName = $match[1] . '.webp';
+    $ok = false;
+    if (is_dir($thumbDir) || mkdir($thumbDir, 0775, true) || is_dir($thumbDir)) {
+        if (imagesx($image) > $width) $image = imagescale($image, $width, -1, IMG_BICUBIC) ?: $image;
+        $ok = imagewebp($image, $thumbDir . DIRECTORY_SEPARATOR . $thumbName, 68);
+    }
+    return $ok ? 'uploads/t/' . $thumbName : null;
 }

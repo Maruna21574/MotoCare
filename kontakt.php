@@ -4,6 +4,8 @@ $pageTitle = 'Kontakt — MotoCare Pro';
 $activePage = 'kontakt';
 include __DIR__ . '/inc/header.php';
 $phoneHref = phoneHref();
+$prefillModel = cleanText($_GET['model'] ?? '', 120);
+$prefillMessage = $prefillModel !== '' ? 'Mám záujem o: ' . $prefillModel . "\n\nModel motorky a rok výroby: " : '';
 ?>
 <?php $hero = ['title' => t('contact.hero_title'), 'text' => textRaw('contact.hero_text'), 'crumbs' => [['Kontakt', null]], 'video' => '4922588']; include __DIR__ . '/inc/page-hero.php'; ?>
 
@@ -18,7 +20,7 @@ $phoneHref = phoneHref();
                 <span class="ct-quick-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1.5"></rect><path d="m4 7 8 6 8-6"></path></svg></span>
                 <small>Napíš e-mail</small><strong><?= e($site['email']) ?></strong><span class="ct-quick-arrow" aria-hidden="true">→</span>
             </a>
-            <a class="ct-quick-card ct-quick-card--accent" href="rezervacia.php">
+            <a class="ct-quick-card ct-quick-card--accent" href="rezervacia">
                 <span class="ct-quick-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M8 3v4M16 3v4M4 9h16M8 13h3M8 16h5"></path></svg></span>
                 <small>Rezervácia</small><strong>Vybrať termín online</strong><span class="ct-quick-arrow" aria-hidden="true">→</span>
             </a>
@@ -38,7 +40,7 @@ $phoneHref = phoneHref();
                             <label>Meno a priezvisko<input type="text" name="name" autocomplete="name" required></label>
                             <label><span class="book-label">Telefón <small>nepovinné</small></span><input type="tel" name="phone" autocomplete="tel" placeholder="+421 ..."></label>
                             <label class="book-field-wide">E-mail<input type="email" name="email" autocomplete="email" required></label>
-                            <label class="book-field-wide">Správa<textarea name="message" rows="5" maxlength="1200" placeholder="Napríklad model motorky, stav laku alebo čo by si chcel riešiť" required></textarea></label>
+                            <label class="book-field-wide">Správa<textarea name="message" rows="5" maxlength="1200" placeholder="Napríklad model motorky, stav laku alebo čo by si chcel riešiť" required><?= e($prefillMessage) ?></textarea></label>
                             <div class="ct-upload book-field-wide" data-photo-upload>
                                 <span class="book-label">Fotky motorky <small>nepovinné, najviac 4</small></span>
                                 <label class="ct-drop">
@@ -51,7 +53,7 @@ $phoneHref = phoneHref();
                             <label class="book-option book-consent book-field-wide">
                                 <input type="checkbox" name="consent" value="1" required>
                                 <span class="book-option-box" aria-hidden="true"></span>
-                                <span class="book-option-text">Súhlasím so <a href="gdpr.php" target="_blank">spracovaním osobných údajov</a> za účelom vybavenia mojej správy.</span>
+                                <span class="book-option-text">Súhlasím so <a href="gdpr" target="_blank">spracovaním osobných údajov</a> za účelom vybavenia mojej správy.</span>
                             </label>
                         </div>
                         <div class="ct-submit">
@@ -65,7 +67,7 @@ $phoneHref = phoneHref();
                     <span class="co-done-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 12.5 4 4 8-9"></path></svg>Správa odoslaná</span>
                     <h2><?= t('contact.done_title') ?></h2>
                     <p id="contact-done-text">Potvrdenie sme ti poslali e-mailom. Zvyčajne odpovedáme do 24 hodín.</p>
-                    <div class="ct-done-actions"><button class="button button--orange" type="button" id="contact-again">Napísať ďalšiu správu</button><a class="book-back" href="index.php">Späť na úvod</a></div>
+                    <div class="ct-done-actions"><button class="button button--orange" type="button" id="contact-again">Napísať ďalšiu správu</button><a class="book-back" href="./">Späť na úvod</a></div>
                 </div>
             </div>
 

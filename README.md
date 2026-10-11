@@ -12,6 +12,14 @@ Podstránky: `sluzby.php`, `sluzba.php`, `galeria.php`, `o-nas.php`, `kontakt.ph
 4. Vytvor schránku `info@motocarepro.eu` — z nej odchádzajú e-maily zákazníkom (PHP `mail()`).
 5. Nastav heslo administrácie (pozri nižšie).
 
+## Čisté adresy
+
+Web používa adresy bez prípony, napr. `/kosik` a `/o-nas`. Zabezpečuje to `.htaccess` (Apache s `mod_rewrite` a `AllowOverride All`, čo Websupport podporuje). Staré adresy s `.php` sa presmerujú na nové (301). Na nginx by sa pravidlá museli prepísať, inak by odkazy v menu nefungovali. `api.php` a administrácia ostávajú s príponou.
+
+## Produkty bez ceny
+
+Produkt s cenou 0 (alebo prázdnou) sa zobrazí ako „Cena čoskoro“ a nedá sa objednať, kým v administrácii (Produkty) nenastavíš cenu. Nové produkty z `inc/catalog.php` sa pridajú príkazom `php admin/import-products.php` (existujúce produkty sa nemenia, dá sa spúšťať opakovane). Fotky sú v `produkty/<id produktu>.webp`. Na hostingu spusti príkaz po nahratí nových súborov, alebo produkty pridaj ručne v administrácii.
+
 ## Administrácia
 
 Adresa: `/admin/` — prihlásenie heslom. Po 5 neúspešných pokusoch sa prihlásenie na 15 minút zablokuje.
@@ -23,6 +31,7 @@ Adresa: `/admin/` — prihlásenie heslom. Po 5 neúspešných pokusoch sa prihl
 - **Produkty** — pridanie, úprava, skrytie, vymazanie a poradie produktov vrátane fotky.
 - **Služby** — ceny, trvanie, fotky a všetky texty služieb; pridanie a vymazanie služby.
 - **Galéria** — nahrávanie, mazanie a poradie fotiek, výber fotiek pre pás na úvodnej stránke.
+- **Rámy** — kategórie padacích rámov a stojanov (`/ramy`): pridanie, premenovanie, popis, skrytie, poradie a fotky kategórie (nahrávanie, poradie, titulná fotka, mazanie). Prvé zobrazenie berie fotky z priečinkov `produkty/ramy/<kategória>/`, po prvom uložení v admine sa spravujú len tu (dáta v `data/frames.json`). Fotky z priečinkov sa v admine len odstránia zo zoznamu, súbor na disku zostane.
 - **Texty** — nadpisy, texty a fotky všetkých stránok (vrátane porovnaní pred/po v galérii).
 - **E-maily** — náhľad všetkých e-mailov, ktoré web posiela.
 - **Nastavenia** — údaje o firme (kontakt, adresa, sociálne siete, mapa), e-mail pre upozornenia a zmena hesla.

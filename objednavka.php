@@ -8,7 +8,7 @@ $icon = static fn (string $paths): string => '<span class="co-section-icon"><svg
 ?>
 <section class="co section-light">
     <div class="container">
-        <nav class="pd-crumbs" aria-label="Omrvinková navigácia"><a href="index.php">Domov</a><span aria-hidden="true">/</span><a href="shop.php">Produkty</a><span aria-hidden="true">/</span><a href="kosik.php">Košík</a><span aria-hidden="true">/</span><span aria-current="page">Objednávka</span></nav>
+        <nav class="pd-crumbs" aria-label="Omrvinková navigácia"><a href="./">Domov</a><span aria-hidden="true">/</span><a href="shop">E-shop</a><span aria-hidden="true">/</span><a href="kosik">Košík</a><span aria-hidden="true">/</span><span aria-current="page">Objednávka</span></nav>
         <div class="co-head">
             <div><h1><?= t('cart.checkout_title') ?></h1><p><?= t('cart.checkout_text') ?></p></div>
             <ol class="co-progress" aria-label="Postup objednávky"><li class="is-done"><span>✓</span>Košík</li><li class="is-active" id="co-step-details"><span>2</span>Údaje</li><li id="co-step-done"><span>3</span>Hotovo</li></ol>
@@ -53,11 +53,11 @@ $icon = static fn (string $paths): string => '<span class="co-section-icon"><svg
                         <label class="book-option book-consent">
                             <input type="checkbox" name="consent" value="1" required>
                             <span class="book-option-box" aria-hidden="true"></span>
-                            <span class="book-option-text">Súhlasím so <a href="gdpr.php" target="_blank">spracovaním osobných údajov</a> za účelom vybavenia objednávky.</span>
+                            <span class="book-option-text">Súhlasím so <a href="gdpr" target="_blank">spracovaním osobných údajov</a> za účelom vybavenia objednávky.</span>
                         </label>
                         <button class="button button--orange co-submit-button" type="submit">Odoslať objednávku na dobierku</button>
                         <p class="form-message" id="checkout-message" role="status" aria-live="polite"></p>
-                        <a class="shop-card-detail" href="kosik.php"><span aria-hidden="true">←</span> Späť do košíka</a>
+                        <a class="shop-card-detail" href="kosik"><span aria-hidden="true">←</span> Späť do košíka</a>
                     </div>
                 </form>
 
@@ -81,12 +81,12 @@ $icon = static fn (string $paths): string => '<span class="co-section-icon"><svg
                         <li><span>02</span><strong>Ozveme sa ti</strong><small>Dohodneme spôsob a cenu doručenia.</small></li>
                         <li><span>03</span><strong>Zaplatíš pri prevzatí</strong><small>Priamo kuriérovi pri doručení.</small></li>
                     </ol>
-                    <div class="co-done-actions"><a class="button button--orange" href="shop.php">Pokračovať v nákupe</a><a class="book-back" href="index.php">Späť na úvod</a></div>
+                    <div class="co-done-actions"><a class="button button--orange" href="shop">Pokračovať v nákupe</a><a class="book-back" href="./">Späť na úvod</a></div>
                 </div>
             </div>
 
             <aside class="co-summary">
-                <div class="co-summary-head"><h2>Tvoja objednávka</h2><a href="kosik.php">Upraviť</a></div>
+                <div class="co-summary-head"><h2>Tvoja objednávka</h2><a href="kosik">Upraviť</a></div>
                 <div id="checkout-items" class="co-items"></div>
                 <dl class="co-totals">
                     <div><dt>Doprava</dt><dd>Dohodou</dd></div>

@@ -9,3 +9,24 @@ RedirectMatch 404 /\.git
     </IfModule>
 </FilesMatch>
 Options -Indexes
+
+# Clean addresses: /kosik instead of /kosik.php. Old .php addresses are redirected (301) to the clean ones.
+# robots.txt and sitemap.xml are generated so they always carry the site's real address.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^robots\.txt$ robots.php [L]
+    RewriteRule ^sitemap\.xml$ sitemap.php [L]
+
+    # .php address -> clean address (the condition stops the loop after the internal rewrite below)
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteCond %{REQUEST_URI} !/admin/
+    RewriteCond %{REQUEST_URI} ^(.*)/index\.php$
+    RewriteRule ^ %1/ [R=301,L]
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteCond %{REQUEST_URI} ^(.*)/(sluzby|sluzba|galeria|o-nas|kontakt|rezervacia|shop|produkt|kosik|objednavka|ramy|gdpr|cookies)\.php$
+    RewriteRule ^ %1/%2 [R=301,L]
+
+    # clean address -> the PHP file
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^(sluzby|sluzba|galeria|o-nas|kontakt|rezervacia|shop|produkt|kosik|objednavka|ramy|gdpr|cookies)$ $1.php [L]
+</IfModule>

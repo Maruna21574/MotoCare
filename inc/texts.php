@@ -19,7 +19,7 @@ return [
         'cta_title' => ['Výzva na konci – nadpis', 'title', 'Naplánujme si tvoju *ďalšiu starostlivosť.*'],
         'cta_text' => ['Výzva na konci – text', 'text', 'Zavolaj alebo napíš — do 24 hodín sa ti ozveme s odporúčaním pre tvoju motorku.'],
     ]],
-    'services' => ['label' => 'Služby', 'url' => 'sluzby.php', 'fields' => [
+    'services' => ['label' => 'Služby', 'url' => 'sluzby', 'fields' => [
         'hero_title' => ['Hlavný nadpis', 'title', "Vyber si úroveň\n*svojej starostlivosti.*"],
         'hero_text' => ['Text pod nadpisom', 'text', 'Od čistého základu po kompletnú premenu s výstavným vzhľadom. Každá služba má svoj dôvod a je postavená tak, aby dávala zmysel tvojej motorke.'],
         'intro_overline' => ['Úvod – malý nadpis', 'line', 'Štyri úrovne. Jeden cieľ.'],
@@ -31,7 +31,7 @@ return [
         'cta_title' => ['Oranžový pás – nadpis', 'line', 'Poradíme ti zadarmo.'],
         'cta_text' => ['Oranžový pás – text', 'text', 'Pošli nám pár fotiek motorky a napíš, čo od starostlivosti čakáš. Odporučíme službu, ktorá dáva zmysel.'],
     ]],
-    'service' => ['label' => 'Detail služby', 'url' => 'sluzba.php', 'fields' => [
+    'service' => ['label' => 'Detail služby', 'url' => 'sluzba', 'fields' => [
         'pickup' => ['Vyzdvihnutie motorky – hodnota', 'line', 'Na požiadanie'],
         'about_overline' => ['O službe – malý nadpis', 'line', 'O službe'],
         'why_eyebrow' => ['Prečo – malý nadpis', 'line', 'Prečo práve táto služba'],
@@ -39,10 +39,12 @@ return [
         'steps_title' => ['Postup – nadpis', 'title', "Každý krok\n*má svoj dôvod.*"],
         'steps_text' => ['Postup – text', 'text', 'Nejde o rýchle umytie. Je to systematická starostlivosť, pri ktorej presne vieme, čo robíme a prečo.'],
         'booking_title' => ['Rezervácia – nadpis', 'title', 'Vyber si *termín.*'],
+        'work_overline' => ['Ukážky práce – malý nadpis', 'line', 'Z našej práce'],
+        'work_title' => ['Ukážky práce – nadpis', 'title', "Takto vyzerá\n*výsledok.*"],
         'related_overline' => ['Ďalšie služby – malý nadpis', 'line', 'Ďalšie služby'],
         'related_title' => ['Ďalšie služby – nadpis', 'title', "Možno hľadáš\n*niečo iné.*"],
     ]],
-    'about' => ['label' => 'O nás', 'url' => 'o-nas.php', 'fields' => [
+    'about' => ['label' => 'O nás', 'url' => 'o-nas', 'fields' => [
         'hero_title' => ['Hlavný nadpis', 'title', "Viac než\n*čistota.*"],
         'hero_text' => ['Text pod nadpisom', 'text', 'MotoCare Pro vzniklo z jednoduchého presvedčenia: motorka nie je len dopravný prostriedok. Je to stroj, do ktorého dávaš čas, energiu a kus seba.'],
         'ticker' => ['Bežiaci pás – heslá', 'list', "Viac než čistota\nKompletná starostlivosť\nČistá práca\nOchrana každého detailu\nPripravená na ďalšiu jazdu\nJazdi s hrdosťou"],
@@ -52,7 +54,7 @@ return [
         'intro_body' => ['Kto sme – ďalšie odseky', 'paragraphs', "Pozeráme sa pod povrch. Na miesta, ktoré nie sú viditeľné na prvej fotografii, ale rozhodujú o tom, ako sa motorka bude správať, vyzerať a starnúť. Soľ, prach, hmyz, asfalt či olej robia svoju prácu každú jazdu a my vieme, ako ich bezpečne odstrániť a povrchy ochrániť.\n\nKaždý motocykel si zaslúži iný prístup. Iný je naháč, ktorý jazdí po meste, iný cestovný enduro stroj po sezóne v Alpách a iný sa pripravuje na predaj. Preto pred prácou najprv počúvame a pozeráme sa, až potom navrhujeme riešenie."],
         'collage_main' => ['Kto sme – veľká fotka', 'image', 'BMW%20R1200%20GS/749681235_17881632810655565_6863675666493123432_n.jpg'],
         'collage_small' => ['Kto sme – malá fotka', 'image', 'img/web/pexels-valeriya-13157926.webp'],
-        'collage_note_title' => ['Kto sme – štítok na fotke', 'line', 'Martin · Kollárova'],
+        'collage_note_title' => ['Kto sme – štítok na fotke', 'line', 'Martin · Kollárova 85'],
         'collage_note_text' => ['Kto sme – text štítku', 'line', 'Štúdio moto starostlivosti'],
         'benefits_eyebrow' => ['Prečo my – malý nadpis', 'line', 'Prečo práve my'],
         'benefits_title' => ['Prečo my – nadpis', 'title', "Na čom si\n*zakladáme.*"],
@@ -75,12 +77,16 @@ return [
         'contact_title' => ['Kontakt – nadpis', 'title', 'Máš otázku k svojej *motorke?*'],
         'contact_text' => ['Kontakt – text', 'text', 'Napíš nám, pošli fotky alebo zavolaj. Poradíme ti, akú starostlivosť tvoja motorka potrebuje, aj keď si ešte nie si istý.'],
     ]],
-    'gallery' => ['label' => 'Galéria', 'url' => 'galeria.php', 'fields' => [
+    'gallery' => ['label' => 'Galéria', 'url' => 'galeria', 'fields' => [
         'hero_title' => ['Hlavný nadpis', 'title', "Detail je náš\n*podpis.*"],
         'hero_text' => ['Text pod nadpisom', 'text', 'Nie je to len o tom, ako motorka vyzerá na fotke. Je o pocite, keď sa k nej vrátiš.'],
         'compare_eyebrow' => ['Porovnanie – malý nadpis', 'line', 'Ukážka rozsahu práce'],
         'compare_title' => ['Porovnanie – nadpis', 'title', "Rozdiel, ktorý\n*cítiš aj vidíš.*"],
         'compare_note' => ['Porovnanie – text', 'text', 'Posuň si porovnanie a pozri sa bližšie na výsledok práce.'],
+        'reels_eyebrow' => ['Videá z dielne – malý nadpis', 'line', 'Z dielne'],
+        'reels_title' => ['Videá z dielne – nadpis', 'title', "Takto vzniká
+*výsledok.*"],
+        'reels_note' => ['Videá z dielne – text', 'text', 'Krátke zábery z našej práce: umývanie, leštenie a ochrana. Klikni na video a prehrá sa.'],
         'compare_label' => ['1. porovnanie – názov na prepínači', 'line', 'BMW R1200 GS'],
         'compare_before' => ['1. porovnanie – fotka PRED', 'image', 'BMW%20R1200%20GS/749108092_17881632822655565_283341050703064590_n.jpg'],
         'compare_after' => ['1. porovnanie – fotka PO', 'image', 'BMW%20R1200%20GS/749714051_17881632771655565_6922466120028112296_n.jpg'],
@@ -89,19 +95,31 @@ return [
         'compare_before_2' => ['2. porovnanie – fotka PRED', 'image', 'BMW%20R1200%20GS/747753362_17881632783655565_7651361316339772478_n.jpg'],
         'compare_after_2' => ['2. porovnanie – fotka PO', 'image', 'BMW%20R1200%20GS/749681235_17881632810655565_6863675666493123432_n.jpg'],
         'compare_caption_2' => ['2. porovnanie – popis pod fotkou', 'line', 'Lak nádrže / korekcia a ochrana'],
-        'compare_label_3' => ['3. porovnanie – názov na prepínači', 'line', 'Hĺbkové čistenie'],
-        'compare_before_3' => ['3. porovnanie – fotka PRED', 'image', 'img/web/pexels-kevin-bruhn-2160372194-36709685.webp'],
-        'compare_after_3' => ['3. porovnanie – fotka PO', 'image', 'img/web/pexels-vanyaoboleninov-4513014.webp'],
-        'compare_caption_3' => ['3. porovnanie – popis pod fotkou', 'line', 'Čistenie detailov / základná starostlivosť'],
+        'compare_label_3' => ['3. porovnanie – názov na prepínači', 'line', 'Suzuki Bandit — výfuk'],
+        'compare_before_3' => ['3. porovnanie – fotka PRED', 'image', 'img/web/suzuki-bandit-vyfuk-pred.webp'],
+        'compare_after_3' => ['3. porovnanie – fotka PO', 'image', 'img/web/suzuki-bandit-vyfuk-po.webp'],
+        'compare_caption_3' => ['3. porovnanie – popis pod fotkou', 'line', 'Suzuki Bandit / leštenie popálených výfukových zberačov'],
     ]],
-    'shop' => ['label' => 'Produkty', 'url' => 'shop.php', 'fields' => [
+    'shop' => ['label' => 'Produkty', 'url' => 'shop', 'fields' => [
         'hero_title' => ['Hlavný nadpis', 'title', "Malé veci.\n*Veľký rozdiel.*"],
         'hero_text' => ['Text pod nadpisom', 'text', 'Produkty, ktoré pomôžu udržať výsledok starostlivosti medzi návštevami štúdia.'],
         'intro_overline' => ['Úvod – malý nadpis', 'line', 'Výbava pre jazdcov, ktorým záleží'],
         'intro_text' => ['Úvod – text', 'text', 'Vybrané produkty pre domácu údržbu motocykla. Platba prebieha na dobierku, dopravu dohodneme po objednávke.'],
         'benefits' => ['Výhody pod produktmi', 'pairs', "Overené v štúdiu | Predávame len to, čo sami používame pri starostlivosti o motorky.\nJednoduché použitie | Žiadna veda. Ku každému produktu ti radi povieme, kedy a ako ho použiť.\nPlatba na dobierku | Objednáš online a zaplatíš až pri prevzatí balíka.\nPoradíme s výberom | Nevieš, čo na tvoju motorku? Napíš nám a odporučíme."],
     ]],
-    'product' => ['label' => 'Detail produktu', 'url' => 'produkt.php', 'fields' => [
+    'frames' => ['label' => 'Rámy a stojany', 'url' => 'ramy', 'fields' => [
+        'hero_title' => ['Hlavný nadpis', 'title', "Padacie rámy\n*a stojany*"],
+        'hero_text' => ['Text pod nadpisom', 'text', 'Ručne vyrábané ochranné prvky na motorky, vždy na mieru podľa modelu. Vyrábame na objednávku.'],
+        'intro_overline' => ['Úvod – malý nadpis', 'line', 'Na objednávku'],
+        'intro_text' => ['Úvod – text', 'text', 'Všetko vyrábame ručne a na mieru. Vyber si typ produktu, pozri si fotky a zisti, či vyrábame pre tvoju motorku. Ozveme sa ti s cenou a termínom výroby.'],
+        'order_title' => ['Detail kategórie – nadpis výzvy', 'line', 'Vyrobíme na mieru pre tvoju motorku'],
+        'order_text' => ['Detail kategórie – text výzvy', 'text', 'Každý kus vyrábame ručne podľa modelu motorky. Napíš nám značku, model a rok výroby a ozveme sa ti s cenou a termínom.'],
+        'empty_text' => ['Kategória bez fotiek – text', 'text', 'Fotky pripravujeme. Ak máš záujem, napíš nám a pošleme ti ukážky.'],
+        'cta_kicker' => ['Oranžový pás – malý nadpis', 'line', 'Máš špeciálnu požiadavku?'],
+        'cta_title' => ['Oranžový pás – nadpis', 'line', 'Vyrobíme aj na mieru'],
+        'cta_text' => ['Oranžový pás – text', 'text', 'Rámy a stojany realizujeme podľa modelu motorky alebo špecifikácie zákazníka. Napíš nám model motorky a pošli fotky.'],
+    ]],
+    'product' => ['label' => 'Detail produktu', 'url' => 'produkt', 'fields' => [
         'perks' => ['Výhody pri tlačidle Do košíka', 'pairs', "Platba na dobierku | Zaplatíš až pri prevzatí.\nDoprava dohodou | Po objednávke sa ti ozveme.\nPoradíme s použitím | Stačí nám napísať alebo zavolať."],
         'about_overline' => ['Popis – malý nadpis', 'line', 'Popis produktu'],
         'about_title' => ['Popis – nadpis', 'title', "Na čo sa\n*hodí.*"],
@@ -110,7 +128,7 @@ return [
         'related_overline' => ['Ďalšie produkty – malý nadpis', 'line', 'Mohlo by sa ti hodiť'],
         'related_title' => ['Ďalšie produkty – nadpis', 'title', "Ďalšie\n*produkty.*"],
     ]],
-    'contact' => ['label' => 'Kontakt', 'url' => 'kontakt.php', 'fields' => [
+    'contact' => ['label' => 'Kontakt', 'url' => 'kontakt', 'fields' => [
         'hero_title' => ['Hlavný nadpis', 'title', "Začnime\n*konzultáciou.*"],
         'hero_text' => ['Text pod nadpisom', 'text', 'Pošli nám správu, fotografiu motorky alebo len otázku. Ozveme sa bez zbytočnej omáčky.'],
         'form_overline' => ['Formulár – malý nadpis', 'line', 'Kontaktný formulár'],
@@ -122,13 +140,13 @@ return [
         'map_title' => ['Mapa – nadpis', 'title', "Zastav sa\n*v štúdiu.*"],
         'map_text' => ['Mapa – text', 'text', 'Nájdeš nás na Kollárovej v Martine. Pred návštevou nám daj vedieť, aby sme si na teba vyhradili čas.'],
     ]],
-    'booking' => ['label' => 'Rezervácia', 'url' => 'rezervacia.php', 'fields' => [
+    'booking' => ['label' => 'Rezervácia', 'url' => 'rezervacia', 'fields' => [
         'overline' => ['Malý nadpis', 'line', 'Online rezervácia'],
         'title' => ['Nadpis', 'title', 'Rezervuj si *termín.*'],
         'text' => ['Text', 'text', 'Vyber službu, deň a čas. Rezervácia zaberie minútu a termín ti potvrdíme e-mailom.'],
         'help' => ['Pomoc pod formulárom', 'text', 'Potrebuješ poradiť so službou? Zavolaj na {phone} alebo napíš na {email}.'],
     ]],
-    'cart' => ['label' => 'Košík a objednávka', 'url' => 'kosik.php', 'fields' => [
+    'cart' => ['label' => 'Košík a objednávka', 'url' => 'kosik', 'fields' => [
         'cart_title' => ['Košík – nadpis', 'title', 'Tvoj *košík.*'],
         'cart_text' => ['Košík – text', 'text', 'Skontroluj produkty a množstvo, potom pokračuj k objednávke.'],
         'empty_title' => ['Prázdny košík – nadpis', 'line', 'Košík je prázdny.'],
@@ -140,14 +158,14 @@ return [
     'footer' => ['label' => 'Pätička (všetky stránky)', 'url' => 'index.php', 'fields' => [
         'cta_title' => ['Výzva nad pätičkou', 'title', 'Pripravený na *ďalšiu jazdu?*'],
     ]],
-    'gdpr' => ['label' => 'Ochrana údajov', 'url' => 'gdpr.php', 'fields' => [
+    'gdpr' => ['label' => 'Ochrana údajov', 'url' => 'gdpr', 'fields' => [
         'hero_title' => ['Hlavný nadpis', 'title', "Ochrana\n*údajov.*"],
         'hero_text' => ['Text pod nadpisom', 'text', 'Informácie o tom, ako MotoCare Pro pracuje s osobnými údajmi.'],
         'overline' => ['Malý nadpis', 'line', 'Ochrana osobných údajov'],
         'title' => ['Nadpis', 'title', "Vaše údaje\n*spracúvame zodpovedne.*"],
-        'body' => ['Obsah', 'rich', "Pri kontakte s nami alebo pri rezervácii spracúvame iba údaje potrebné na vybavenie vašej požiadavky a komunikáciu s vami.\n\n## Aké údaje používame\nMôže ísť najmä o meno, telefónne číslo, e-mail, údaje o rezervácii a obsah správy, ktorú nám odošlete.\n\n## Prečo ich spracúvame\nÚdaje používame na odpoveď na vaše otázky, vybavenie rezervácie a súvisiacu komunikáciu. Nepredávame ich tretím stranám.\n\n## Kontakt\nAk máte otázku k spracúvaniu osobných údajov, napíšte na {email}."],
+        'body' => ['Obsah', 'rich', "Pri kontakte s nami alebo pri rezervácii spracúvame iba údaje potrebné na vybavenie vašej požiadavky a komunikáciu s vami.\n\n## Prevádzkovateľ\nPrevádzkovateľom osobných údajov je {company} (ďalej len „prevádzkovateľ“), ktorá prevádzkuje značku {name}.\n\n## Aké údaje používame\nMôže ísť najmä o meno, telefónne číslo, e-mail, údaje o rezervácii a obsah správy, ktorú nám odošlete.\n\n## Prečo ich spracúvame\nÚdaje používame na odpoveď na vaše otázky, vybavenie rezervácie a súvisiacu komunikáciu. Nepredávame ich tretím stranám.\n\n## Kontakt\nAk máte otázku k spracúvaniu osobných údajov, napíšte na {email}."],
     ]],
-    'cookies' => ['label' => 'Cookies', 'url' => 'cookies.php', 'fields' => [
+    'cookies' => ['label' => 'Cookies', 'url' => 'cookies', 'fields' => [
         'hero_title' => ['Hlavný nadpis', 'title', "O cookies\n*jednoducho.*"],
         'hero_text' => ['Text pod nadpisom', 'text', 'Informácie o používaní cookies na tomto webe.'],
         'overline' => ['Malý nadpis', 'line', 'Cookies'],

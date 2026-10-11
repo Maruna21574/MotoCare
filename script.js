@@ -84,7 +84,7 @@
         galleryIndex = (index + galleryCount) % galleryCount;
         const item = galleryItems[galleryIndex];
         const image = $('img', item);
-        galleryLightboxImage.src = image.currentSrc || image.src;
+        galleryLightboxImage.src = item.dataset.full || image.currentSrc || image.src;
         galleryLightboxImage.alt = image.alt;
         if (galleryLightboxCounter) galleryLightboxCounter.textContent = `${galleryIndex + 1} / ${galleryCount}`;
         $$('[data-lightbox-thumb]', galleryLightboxThumbs).forEach((thumb) => thumb.classList.toggle('is-active', Number(thumb.dataset.lightboxThumb) === galleryIndex));
@@ -114,6 +114,23 @@
         item.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); }
         });
+    });
+    // Workshop videos: a click plays or pauses a clip, only one plays at a time.
+    const reels = $$('[data-reel]');
+    reels.forEach((reel) => reel.addEventListener('click', () => {
+        const video = $('video', reel);
+        reels.forEach((other) => { if (other !== reel) { $('video', other).pause(); other.classList.remove('is-playing'); } });
+        if (video.paused) { video.preload = 'auto'; video.play().catch(() => {}); reel.classList.add('is-playing'); }
+        else { video.pause(); reel.classList.remove('is-playing'); }
+    }));
+    // Gallery page shows the first photos; the button reveals the rest in steps.
+    const galleryMore = $('[data-gallery-more]');
+    galleryMore?.addEventListener('click', () => {
+        const hidden = galleryItems.filter((item) => item.hidden);
+        hidden.slice(0, Number(galleryMore.dataset.step) || 24).forEach((item) => { item.hidden = false; });
+        const shown = $('[data-gallery-shown]');
+        if (shown) shown.textContent = galleryItems.filter((item) => !item.hidden).length;
+        if (hidden.length <= (Number(galleryMore.dataset.step) || 24)) galleryMore.parentElement.remove();
     });
     galleryLightbox?.addEventListener('click', (event) => {
         if (event.target.closest('[data-lightbox-close]') || event.target.classList.contains('lb-stage')) closeGalleryLightbox();
@@ -470,7 +487,7 @@
             const product = window.MOTOCARE?.products?.[item.id] || {};
             const name = item.name || product.name || 'Produkt';
             const image = item.image || product.image || '';
-            const url = `produkt.php?slug=${encodeURIComponent(item.id)}`;
+            const url = `produkt?slug=${encodeURIComponent(item.id)}`;
             const id = escapeHtml(item.id);
             const meta = [`${item.price} € / ks`, product.volume ? `${product.volume} ml` : ''].filter(Boolean).join(' · ');
             return `<article class="cart-item">
@@ -506,8 +523,8 @@
             const name = item.name || product.name || 'Produkt';
             const image = item.image || product.image || '';
             const imageMarkup = image ? `<img src="${escapeHtml(image)}" alt="">` : '';
-            return `<a class="co-item" href="produkt.php?slug=${encodeURIComponent(item.id)}"><span class="co-item-image">${imageMarkup}<b>${item.quantity}</b></span><span class="co-item-copy"><strong>${escapeHtml(name)}</strong><small>${item.quantity} × ${item.price} €</small></span><span class="co-item-price">${item.price * item.quantity} €</span></a>`;
-        }).join('') : '<div class="co-empty">Košík je prázdny. <a href="shop.php">Prejsť k produktom</a></div>';
+            return `<a class="co-item" href="produkt?slug=${encodeURIComponent(item.id)}"><span class="co-item-image">${imageMarkup}<b>${item.quantity}</b></span><span class="co-item-copy"><strong>${escapeHtml(name)}</strong><small>${item.quantity} × ${item.price} €</small></span><span class="co-item-price">${item.price * item.quantity} €</span></a>`;
+        }).join('') : '<div class="co-empty">Košík je prázdny. <a href="shop">Prejsť k produktom</a></div>';
         if (checkoutTotal) checkoutTotal.textContent = `${cartAmount()} €`;
     };
     if (checkoutForm) {
@@ -554,4 +571,22 @@
             }
         });
     }
+
+    // Slider podobných produktov (detail produktu): šípky posúvajú o jednu kartu, na mobile sa prejde prstom.
+    $$('[data-slider]').forEach((slider) => {
+        const track = $('[data-slider-track]', slider);
+        const prev = $('[data-slider-prev]', slider);
+        const next = $('[data-slider-next]', slider);
+        if (!track || !prev || !next) return;
+        const step = () => (track.firstElementChild?.getBoundingClientRect().width || 300) + 18;
+        const update = () => {
+            prev.disabled = track.scrollLeft <= 4;
+            next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
+        };
+        prev.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: 'smooth' }));
+        next.addEventListener('click', () => track.scrollBy({ left: step(), behavior: 'smooth' }));
+        track.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+        update();
+    });
 })();
