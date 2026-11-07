@@ -67,6 +67,12 @@ $icon = static fn (string $paths): string => '<span class="co-section-icon"><svg
                     </div>
                 </form>
 
+                <div class="co-card" id="checkout-pay" hidden>
+                    <h2 class="co-card-title">Platba</h2>
+                    <div id="checkout-pay-embed" class="pay-embed"></div>
+                    <button class="book-back" type="button" data-pay-cancel>Späť k údajom</button>
+                </div>
+
                 <div class="co-card co-done" id="checkout-done" hidden>
                     <div class="co-done-top">
                         <span class="co-done-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 12.5 4 4 8-9"></path></svg>Objednávka prijatá</span>

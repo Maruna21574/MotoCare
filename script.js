@@ -3,6 +3,30 @@
 
     const $ = (selector, scope = document) => scope.querySelector(selector);
     const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
+
+    // Embedded payment form (Stripe loads only when the customer actually goes to pay).
+    let paymentScript = null;
+    const loadPaymentScript = () => {
+        if (!paymentScript) {
+            paymentScript = new Promise((resolve, reject) => {
+                if (window.Stripe) { resolve(window.Stripe); return; }
+                const script = document.createElement('script');
+                script.src = 'https://js.stripe.com/v3/';
+                script.onload = () => resolve(window.Stripe);
+                script.onerror = () => { paymentScript = null; reject(new Error('Platobný formulár sa nepodarilo načítať. Skús to prosím znova.')); };
+                document.head.appendChild(script);
+            });
+        }
+        return paymentScript;
+    };
+    const mountPayment = async (result, container) => {
+        const Stripe = await loadPaymentScript();
+        const checkout = await Stripe(result.publishable_key).initEmbeddedCheckout({ clientSecret: result.client_secret });
+        container.innerHTML = '';
+        checkout.mount(container);
+        return checkout;
+    };
+    const cancelPayment = (secret) => fetch('api.php?action=payment_cancel', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ session_id: secret }) }).catch(() => {});
     const CART_KEY = 'motocare_cart';
     const readCart = () => {
         try { const stored = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); return Array.isArray(stored) ? stored : []; }
@@ -220,6 +244,7 @@
         const monthLabel = $('#book-month-label');
         const message = $('#book-message');
         let step = 1;
+        let payment = null; // { secret, checkout } while the payment form is open
         let view = { year: todayYear, month: todayMonth };
         let selectedSlot = null;
         let autoPick = true;
@@ -235,8 +260,8 @@
             panels.forEach((panel) => { panel.hidden = panel.dataset.panel !== String(target); });
             stepItems.forEach((item) => {
                 const number = Number(item.dataset.step);
-                item.classList.toggle('is-active', number === target);
-                item.classList.toggle('is-done', target === 'done' || number < target);
+                item.classList.toggle('is-active', number === (target === 'pay' ? 4 : target));
+                item.classList.toggle('is-done', target === 'done' || number < (target === 'pay' ? 4 : target));
             });
             if (target === 2) enterDateStep();
             if (target === 4) renderSummary();
@@ -389,6 +414,12 @@
             if (pickup.checked) $('input', pickupAddress).focus();
         });
 
+        // Leaving the payment form: close it, free the held slot and go back to the summary.
+        $$('[data-pay-cancel]', bookForm).forEach((button) => button.addEventListener('click', () => {
+            if (payment) { payment.checkout.destroy(); cancelPayment(payment.secret); payment = null; }
+            showStep(4);
+        }));
+
         bookForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             if (step !== 4) return;
@@ -405,6 +436,12 @@
                 if (!result.ok) {
                     setMessage(result.message || 'Rezerváciu sa nepodarilo odoslať.', 'error');
                     if (response.status === 409) { resetDate(); autoPick = false; toast(result.message); showStep(2); }
+                    return;
+                }
+                if (result.client_secret) {
+                    submit.textContent = 'Načítavam platbu…';
+                    payment = { secret: result.client_secret, checkout: await mountPayment(result, $('#book-pay-embed')) };
+                    showStep('pay');
                     return;
                 }
                 if (result.checkout_url) { redirecting = true; submit.textContent = 'Presmerovávam na platbu…'; window.location.href = result.checkout_url; return; }
@@ -596,7 +633,13 @@
     const checkoutItems = $('#checkout-items');
     const checkoutTotal = $('#checkout-total');
     const checkoutMessage = $('#checkout-message');
-    const checkoutPayMode = () => $('input[name="payment"]:checked', checkoutForm)?.value || 'dobierka';
+    let orderPayment = null; // { secret, checkout } while the payment form is open
+    $$('[data-pay-cancel]', $('#checkout-pay') || document.createElement('div')).forEach((button) => button.addEventListener('click', () => {
+        if (orderPayment) { orderPayment.checkout.destroy(); cancelPayment(orderPayment.secret); orderPayment = null; }
+        $('#checkout-pay').hidden = true;
+        checkoutForm.hidden = false;
+    }));
+    const checkoutPayMode =() => $('input[name="payment"]:checked', checkoutForm)?.value || 'dobierka';
     const checkoutSubmitLabel = () => (checkoutPayMode() === 'online' ? 'Zaplatiť online' : 'Odoslať objednávku na dobierku');
     const syncCheckoutPay = () => {
         if (!checkoutForm) return;
@@ -638,6 +681,14 @@
                 const response = await fetch('api.php?action=shop_order', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ customer, cart }) });
                 const result = await response.json();
                 if (!result.ok) throw new Error(result.message || 'Objednávku sa nepodarilo odoslať.');
+                if (result.client_secret) {
+                    submit.textContent = 'Načítavam platbu…';
+                    orderPayment = { secret: result.client_secret, checkout: await mountPayment(result, $('#checkout-pay-embed')) };
+                    checkoutForm.hidden = true;
+                    $('#checkout-pay').hidden = false;
+                    $('#checkout-pay').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    return;
+                }
                 if (result.checkout_url) { redirecting = true; submit.textContent = 'Presmerovávam na platbu…'; window.location.href = result.checkout_url; return; }
                 $('#checkout-done-text').textContent = `Potvrdenie sme poslali na ${customer.email}. Čoskoro sa ti ozveme kvôli doručeniu.`;
                 $('#checkout-done-id').textContent = result.order.id;

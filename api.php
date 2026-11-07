@@ -84,6 +84,15 @@ function discardUnpaid(string $file, string $id): void
     });
 }
 
+/** Answer for the browser after a payment session is created: the embedded form (client_secret) or a redirect address. */
+function paymentResponse(array $session): void
+{
+    if (stripeEmbedded() && !empty($session['client_secret'])) {
+        apiResponse(['ok' => true, 'message' => 'Platba pripravená.', 'client_secret' => $session['client_secret'], 'publishable_key' => stripeConfig()['publishable_key']]);
+    }
+    apiResponse(['ok' => true, 'message' => 'Presmerovávame na platbu.', 'checkout_url' => $session['url'] ?? '']);
+}
+
 $action = cleanText($_GET['action'] ?? '', 50);
 
 if ($action === 'availability') {
@@ -163,7 +172,24 @@ if ($action === 'book' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         discardUnpaid($bookingsFile, $booking['id']);
         apiResponse(['ok' => false, 'message' => 'Platobnú bránu sa nepodarilo otvoriť. Skús to prosím znova alebo nám zavolaj.'], 502);
     }
-    apiResponse(['ok' => true, 'message' => 'Presmerovávame na platbu.', 'checkout_url' => $session['url']]);
+    paymentResponse($session);
+}
+
+// The customer left the payment form: expire the Stripe session and free the unpaid booking / order.
+if ($action === 'payment_cancel' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = requestData();
+    $sessionId = cleanText($data['session_id'] ?? '', 200);
+    if (!preg_match('/^cs_[A-Za-z0-9_]+$/', $sessionId)) apiResponse(['ok' => false, 'message' => 'Neplatná platba.'], 422);
+    $sessionId = explode('_secret_', $sessionId)[0];
+    foreach ([$bookingsFile, $ordersFile] as $file) {
+        updateJsonFile($file, static function (array &$records) use ($sessionId): void {
+            foreach ($records as &$record) {
+                if (($record['stripe_session'] ?? '') === $sessionId && ($record['status'] ?? '') === 'unpaid' && empty($record['paid_at'])) $record['status'] = 'cancelled';
+            }
+        });
+    }
+    try { stripeRequest('POST', 'checkout/sessions/' . $sessionId . '/expire'); } catch (RuntimeException $exception) { /* already expired or paid */ }
+    apiResponse(['ok' => true]);
 }
 
 if ($action === 'payment_confirm') {
@@ -233,7 +259,7 @@ if ($action === 'shop_order' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         discardUnpaid($ordersFile, $order['id']);
         apiResponse(['ok' => false, 'message' => 'Platobnú bránu sa nepodarilo otvoriť. Skús to prosím znova alebo nám zavolaj.'], 502);
     }
-    apiResponse(['ok' => true, 'message' => 'Presmerovávame na platbu.', 'checkout_url' => $session['url']]);
+    paymentResponse($session);
 }
 
 if ($action === 'contact' && $_SERVER['REQUEST_METHOD'] === 'POST') {

@@ -86,6 +86,13 @@
         <div class="book-nav"><button class="book-back" type="button" data-prev>Späť</button><button class="button button--orange" type="submit" data-submit-label>Zaplatiť a rezervovať</button></div>
     </div>
 
+    <div class="book-panel" data-panel="pay" hidden>
+        <h2 class="book-title">Platba</h2>
+        <p class="book-pay-note">Zaplať kartou priamo tu. Termín ti držíme 30 minút, po zaplatení je záväzný.</p>
+        <div id="book-pay-embed" class="pay-embed"></div>
+        <div class="book-nav"><button class="book-back" type="button" data-pay-cancel>Zrušiť platbu a vrátiť sa</button></div>
+    </div>
+
     <div class="book-panel book-done" data-panel="done" hidden>
         <span class="book-done-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 12.5 4 4 8-9"></path></svg></span>
         <h2 class="book-title">Ďakujeme, máme to.</h2>

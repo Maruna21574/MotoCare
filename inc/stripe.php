@@ -11,12 +11,19 @@ function stripeConfig(): array
     return [
         'secret_key' => trim((string) ($config['secret_key'] ?? getenv('STRIPE_SECRET_KEY') ?: '')),
         'webhook_secret' => trim((string) ($config['webhook_secret'] ?? getenv('STRIPE_WEBHOOK_SECRET') ?: '')),
+        'publishable_key' => trim((string) ($config['publishable_key'] ?? getenv('STRIPE_PUBLISHABLE_KEY') ?: '')),
     ];
 }
 
 function stripeConfigured(): bool
 {
     return str_starts_with(stripeConfig()['secret_key'], 'sk_');
+}
+
+/** True when the payment form is shown inside our own page (needs the publishable key); otherwise the hosted payment page is used. */
+function stripeEmbedded(): bool
+{
+    return str_starts_with(stripeConfig()['publishable_key'], 'pk_');
 }
 
 /** Calls the Stripe API. Returns the decoded response or throws RuntimeException with a safe message. */
@@ -29,6 +36,7 @@ function stripeRequest(string $method, string $path, array $params = []): array
         CURLOPT_TIMEOUT => 25,
         CURLOPT_USERPWD => stripeConfig()['secret_key'] . ':',
         CURLOPT_CUSTOMREQUEST => $method,
+        CURLOPT_HTTPHEADER => ['Stripe-Version: 2024-06-20'], // pinned so that behaviour does not change with the account's default version
     ];
     if ($method === 'POST') $options[CURLOPT_POSTFIELDS] = http_build_query($params);
     curl_setopt_array($curl, $options);
@@ -50,8 +58,6 @@ function stripeCreateCheckout(string $kind, string $id, string $email, array $li
 {
     $params = [
         'mode' => 'payment',
-        'success_url' => $successUrl,
-        'cancel_url' => $cancelUrl,
         'customer_email' => $email,
         'client_reference_id' => $id,
         'locale' => 'sk',
@@ -59,6 +65,14 @@ function stripeCreateCheckout(string $kind, string $id, string $email, array $li
         'metadata' => ['kind' => $kind, 'id' => $id],
         'payment_intent_data' => ['metadata' => ['kind' => $kind, 'id' => $id], 'description' => ($kind === 'booking' ? 'Rezervácia ' : 'Objednávka ') . $id],
     ];
+    if (stripeEmbedded()) {
+        // The payment form is shown on our own page; after paying the customer is sent to the return address.
+        $params['ui_mode'] = 'embedded';
+        $params['return_url'] = $successUrl;
+    } else {
+        $params['success_url'] = $successUrl;
+        $params['cancel_url'] = $cancelUrl;
+    }
     foreach (array_values($lines) as $index => [$name, $amount, $quantity]) {
         $params['line_items'][$index] = [
             'quantity' => max(1, (int) $quantity),
