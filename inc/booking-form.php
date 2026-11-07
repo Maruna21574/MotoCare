@@ -76,8 +76,14 @@
             <span class="book-option-box" aria-hidden="true"></span>
             <span class="book-option-text">Súhlasím so <a href="gdpr" target="_blank">spracovaním osobných údajov</a> za účelom vybavenia rezervácie.</span>
         </label>
+        <fieldset class="pay-choice">
+            <legend>Spôsob platby</legend>
+            <?php $stripeOn = stripeConfigured(); ?>
+            <label><input type="radio" name="payment" value="online" <?= $stripeOn ? 'checked' : 'disabled' ?>><span><strong>Zaplatiť online</strong><small><?= $stripeOn ? 'Bezpečná online platba kartou. Termín je záväzný hneď po zaplatení, do tej doby ho držíme 30 minút.' : 'Online platba zatiaľ nie je dostupná.' ?></small></span></label>
+            <label><input type="radio" name="payment" value="onsite" <?= $stripeOn ? '' : 'checked' ?>><span><strong>Zaplatiť na mieste</strong><small>Zaplatíš v štúdiu pri preberaní motorky. Termín ti potvrdíme e-mailom.</small></span></label>
+        </fieldset>
         <p class="form-message" id="book-message" role="status" aria-live="polite"></p>
-        <div class="book-nav"><button class="book-back" type="button" data-prev>Späť</button><button class="button button--orange" type="submit">Odoslať rezerváciu</button></div>
+        <div class="book-nav"><button class="book-back" type="button" data-prev>Späť</button><button class="button button--orange" type="submit" data-submit-label>Zaplatiť a rezervovať</button></div>
     </div>
 
     <div class="book-panel book-done" data-panel="done" hidden>

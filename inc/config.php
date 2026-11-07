@@ -253,6 +253,7 @@ function productUnitPrice(array $product): string
 
 require_once __DIR__ . '/booking.php';
 require_once __DIR__ . '/mail.php';
+require_once __DIR__ . '/stripe.php';
 require_once __DIR__ . '/content.php';
 require_once __DIR__ . '/spam.php';
 require_once __DIR__ . '/seo.php';

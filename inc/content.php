@@ -150,6 +150,11 @@ function textPlaceholders(string $html): string
         '{address}' => e(siteAddress()),
         '{company}' => e(companyIntro()),
         '{name}' => e($site['name']),
+        '{company_name}' => e((string) ($site['company_name'] ?? $site['name'])),
+        '{company_seat}' => e((string) ($site['company_seat'] ?? siteAddress())),
+        '{cookie_settings}' => '<button type="button" class="button button--orange" data-cookie-settings>Nastavenia súhlasu</button>',
+        '{ico}' => e((string) ($site['company_ico'] ?? '')),
+        '{dic}' => e((string) ($site['company_dic'] ?? '')),
     ]);
 }
 
@@ -169,13 +174,14 @@ function t(string $key): string
         foreach (preg_split('/\R\s*\R/u', $value) as $block) {
             $block = trim($block);
             if ($block === '') continue;
-            if ($type === 'rich' && str_starts_with($block, '## ')) {
+            if ($type === 'rich' && (str_starts_with($block, '## ') || str_starts_with($block, '### '))) {
                 $lines = preg_split('/\R/u', $block);
-                $html .= '<h3>' . e(substr(array_shift($lines), 3)) . '</h3>';
+                $first = array_shift($lines);
+                $html .= str_starts_with($first, '### ') ? '<h4>' . e(substr($first, 4)) . '</h4>' : '<h3>' . e(substr($first, 3)) . '</h3>';
                 $block = trim(implode("\n", $lines));
                 if ($block === '') continue;
             }
-            $html .= '<p>' . nl2br(e($block), false) . '</p>';
+            $html .= $type === 'rich' ? richBlock($block) : '<p>' . nl2br(e($block), false) . '</p>';
         }
         return textPlaceholders($html);
     }
@@ -279,4 +285,43 @@ function makeGalleryThumb(string $webPath, int $width = 640): ?string
         $ok = imagewebp($image, $thumbDir . DIRECTORY_SEPARATOR . $thumbName, 68);
     }
     return $ok ? 'uploads/t/' . $thumbName : null;
+}
+
+/** Rich text block: lines starting with "• " become a list, other lines a paragraph. */
+function richBlock(string $block): string
+{
+    $html = '';
+    $para = [];
+    $items = [];
+    $rows = [];
+    $flush = static function () use (&$html, &$para, &$items, &$rows): void {
+        if ($para) $html .= '<p>' . implode('<br>', $para) . '</p>';
+        if ($items) $html .= '<ul>' . implode('', $items) . '</ul>';
+        if ($rows) {
+            $head = array_shift($rows);
+            $html .= '<div class="legal-table-wrap"><table class="legal-table"><thead><tr>' . implode('', array_map(static fn (string $cell): string => '<th>' . e($cell) . '</th>', $head)) . '</tr></thead><tbody>';
+            foreach ($rows as $row) $html .= '<tr>' . implode('', array_map(static fn (string $cell): string => '<td>' . e($cell) . '</td>', $row)) . '</tr>';
+            $html .= '</tbody></table></div>';
+        }
+        $para = [];
+        $items = [];
+        $rows = [];
+    };
+    foreach (preg_split('/\R/u', $block) as $line) {
+        if (str_starts_with($line, '• ')) {
+            if ($para || $rows) $flush();
+            $items[] = '<li>' . e(substr($line, strlen('• '))) . '</li>';
+        } elseif (str_starts_with($line, '### ')) {
+            $flush();
+            $html .= '<h4>' . e(substr($line, 4)) . '</h4>';
+        } elseif (str_starts_with($line, '|')) {
+            if ($para || $items) $flush();
+            $rows[] = array_map('trim', explode('|', trim($line, '| ')));
+        } else {
+            if ($items || $rows) $flush();
+            $para[] = e($line);
+        }
+    }
+    $flush();
+    return $html;
 }

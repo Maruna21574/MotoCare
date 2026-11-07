@@ -44,6 +44,7 @@ function notifyEmail(): string
 function bookingStatuses(): array
 {
     return [
+        'unpaid' => 'Čaká na platbu',
         'pending' => 'Čaká na potvrdenie',
         'confirmed' => 'Potvrdená',
         'done' => 'Dokončená',
@@ -54,12 +55,22 @@ function bookingStatuses(): array
 function orderStatuses(): array
 {
     return [
+        'unpaid' => 'Čaká na platbu',
         'new' => 'Nová',
         'confirmed' => 'Potvrdená',
         'shipped' => 'Odoslaná',
         'done' => 'Vybavená',
         'cancelled' => 'Zrušená',
     ];
+}
+
+/** An unpaid booking keeps its slot only until its payment window ends; cancelled bookings never do. */
+function bookingHoldsSlot(array $booking): bool
+{
+    $status = bookingStatus($booking);
+    if ($status === 'cancelled') return false;
+    if ($status === 'unpaid') return strtotime((string) ($booking['hold_until'] ?? '')) > time();
+    return true;
 }
 
 function bookingStatus(array $booking): string
@@ -147,7 +158,7 @@ function availableSlots(string $date, int $serviceMinutes, array $bookings, arra
             if (bookingOverlap($start, $duration, $block['start'], $block['end'] - $block['start'])) { $available = false; break; }
         }
         if ($available) foreach ($bookings as $booking) {
-            if (($booking['date'] ?? '') !== $date || bookingStatus($booking) === 'cancelled' || ($booking['id'] ?? '') === $excludeId) continue;
+            if (($booking['date'] ?? '') !== $date || !bookingHoldsSlot($booking) || ($booking['id'] ?? '') === $excludeId) continue;
             if (bookingOverlap($start, $duration, minutesFromTime((string) $booking['time']), (int) ($booking['duration'] ?? 0))) { $available = false; break; }
         }
         $slots[] = ['time' => formatTime($start), 'end' => formatTime($start + $duration), 'available' => $available];
@@ -187,7 +198,7 @@ function bookingConflicts(string $date, string $time, int $duration, array $book
         if (bookingOverlap($start, $duration, $block['start'], $block['end'] - $block['start'])) $conflicts[] = 'Prekrýva sa s blokáciou' . ($block['label'] !== '' ? ' „' . $block['label'] . '“' : '') . '.';
     }
     foreach ($bookings as $booking) {
-        if (($booking['date'] ?? '') !== $date || bookingStatus($booking) === 'cancelled' || ($booking['id'] ?? '') === $excludeId) continue;
+        if (($booking['date'] ?? '') !== $date || !bookingHoldsSlot($booking) || ($booking['id'] ?? '') === $excludeId) continue;
         if (bookingOverlap($start, $duration, minutesFromTime((string) $booking['time']), (int) ($booking['duration'] ?? 0))) {
             $conflicts[] = 'Prekrýva sa s rezerváciou ' . $booking['id'] . ' (' . $booking['time'] . ' – ' . ($booking['end_time'] ?? '') . ', ' . ($booking['name'] ?? '') . ').';
         }

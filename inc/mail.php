@@ -102,7 +102,7 @@ function bookingRows(array $booking): array
         ['Kód rezervácie', $booking['id']],
         ['Služba', $booking['service_name']],
         ['Termín', ucfirst(formatDateSk($booking['date'])) . ', ' . $booking['time'] . ' – ' . $booking['end_time']],
-        ['Cena od', (int) $booking['price'] . ' €'],
+        ['Cena', (int) $booking['price'] . ' €' . (!empty($booking['paid_at']) ? ' (zaplatené online)' : ' (platba na mieste)')],
         ['Motorka', $booking['bike'] ?? ''],
         ['Vyzdvihnutie na adrese', !empty($booking['pickup']) ? (string) $booking['pickup_address'] : ''],
         ['Poznámka', $booking['note'] ?? ''],
@@ -131,7 +131,7 @@ function bookingMail(array $booking, string $type, string $note = ''): ?array
     $call = 'Ak sa ti termín nehodí, stačí odpovedať na tento e-mail alebo zavolať na ' . $site['phone'] . '.';
     switch ($type) {
         case 'received':
-            return mailMessage('Prijali sme tvoju rezerváciu ' . $id, 'Rezervácia prijatá', $greeting, 'ďakujeme za rezerváciu. Termín sme si zapísali a čoskoro ti ho potvrdíme e-mailom.', $rows, $note, null, $call);
+            return mailMessage('Prijali sme tvoju rezerváciu ' . $id, 'Rezervácia prijatá', $greeting, (!empty($booking['paid_at']) ? 'ďakujeme za rezerváciu a platbu' : 'ďakujeme za rezerváciu') . '. Termín sme si zapísali a čoskoro ti ho potvrdíme e-mailom.', $rows, $note, null, $call);
         case 'pending':
             return mailMessage('Rezervácia ' . $id . ' čaká na potvrdenie', 'Čaká na potvrdenie', $greeting, 'tvoja rezervácia opäť čaká na potvrdenie. Ozveme sa ti čo najskôr.', $rows, $note, null, $call);
         case 'confirmed':
@@ -173,7 +173,7 @@ function orderRows(array $order): array
 {
     $rows = [['Číslo objednávky', $order['id']]];
     foreach ($order['items'] as $item) $rows[] = [(int) $item['quantity'] . '× ' . $item['name'], (int) $item['price'] * (int) $item['quantity'] . ' €'];
-    $rows[] = ['Spolu', (int) $order['total'] . ' € (platba na dobierku)'];
+    $rows[] = ['Spolu', (int) $order['total'] . ((($order['payment'] ?? '') === 'dobierka') ? ' € (platba na dobierku)' : ' € (zaplatené online)')];
     $rows[] = ['Doručenie', $order['customer']['address']];
     return $rows;
 }
@@ -197,11 +197,11 @@ function orderMail(array $order, string $type, string $note = ''): ?array
     $rows = orderRows($order);
     switch ($type) {
         case 'received':
-            return mailMessage('Prijali sme tvoju objednávku ' . $id, 'Objednávka prijatá', $greeting, 'ďakujeme za objednávku. Skontrolujeme ju a ozveme sa ti kvôli doručeniu.', $rows, $note);
+            return mailMessage('Prijali sme tvoju objednávku ' . $id, 'Objednávka prijatá', $greeting, (($order['payment'] ?? '') === 'dobierka' ? 'ďakujeme za objednávku' : 'ďakujeme za objednávku a platbu') . '. Skontrolujeme ju a ozveme sa ti kvôli doručeniu.', $rows, $note);
         case 'confirmed':
             return mailMessage('Objednávka ' . $id . ' je potvrdená', 'Objednávka potvrdená', $greeting, 'tvoju objednávku sme potvrdili a pripravujeme ju na odoslanie.', $rows, $note);
         case 'shipped':
-            return mailMessage('Objednávka ' . $id . ' je na ceste', 'Objednávka odoslaná', $greeting, 'tvoja objednávka je odoslaná. Zaplatíš pri prevzatí.', $rows, $note);
+            return mailMessage('Objednávka ' . $id . ' je na ceste', 'Objednávka odoslaná', $greeting, (($order['payment'] ?? '') === 'dobierka' ? 'tvoja objednávka je odoslaná. Zaplatíš pri prevzatí.' : 'tvoja objednávka je odoslaná a je už zaplatená.'), $rows, $note);
         case 'done':
             return mailMessage('Ďakujeme za nákup – ' . $id, 'Objednávka vybavená', $greeting, 'tvoja objednávka je vybavená. Ďakujeme za nákup a nech ti produkty dobre slúžia.', $rows, $note, ['Pozrieť ďalšie produkty', siteUrl('shop')]);
         case 'cancelled':
@@ -223,7 +223,7 @@ function orderOwnerMail(array $order): array
         ['Zákazník', $customer['name']], ['Telefón', $customer['phone']], ['E-mail', $customer['email']],
         ['IČO', $customer['ico'] ?? ''], ['DIČ', $customer['dic'] ?? ''], ['Poznámka', $customer['note'] ?? ''],
     ]);
-    return mailMessage('Nová objednávka ' . $order['id'] . ' – ' . (int) $order['total'] . ' €', 'Nová objednávka', '', 'Z e-shopu prišla nová objednávka na dobierku.', $rows, '', ['Otvoriť v administrácii', siteUrl('admin/index.php?p=orders')]);
+    return mailMessage('Nová objednávka ' . $order['id'] . ' – ' . (int) $order['total'] . ' €', 'Nová objednávka', '', (($order['payment'] ?? '') === 'dobierka' ? 'Z e-shopu prišla nová objednávka na dobierku.' : 'Z e-shopu prišla nová, už zaplatená objednávka (online).'), $rows, '', ['Otvoriť v administrácii', siteUrl('admin/index.php?p=orders')]);
 }
 
 function sendOrderOwnerMail(array $order): bool

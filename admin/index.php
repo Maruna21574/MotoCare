@@ -430,7 +430,7 @@ if ($page === 'orders') {
     }));
     renderHeader('Objednávky', 'orders');
     ?>
-    <div class="page-head"><div><h1>Objednávky</h1><p class="muted">Objednávky z e-shopu na dobierku.</p></div></div>
+    <div class="page-head"><div><h1>Objednávky</h1><p class="muted">Objednávky z e-shopu: platba online alebo na dobierku. Objednávky platené kartou sa zobrazia v „Na vybavenie“ až po zaplatení.</p></div></div>
     <nav class="tabs">
         <?php foreach (['open' => 'Na vybavenie', 'new' => 'Nové', 'shipped' => 'Odoslané', 'done' => 'Vybavené', 'cancelled' => 'Zrušené', 'all' => 'Všetky'] as $key => $label): ?>
         <a class="<?= $filter === $key ? 'is-active' : '' ?>" href="index.php?p=orders&f=<?= e($key) ?>"><?= e($label) ?></a>
@@ -440,7 +440,7 @@ if ($page === 'orders') {
     <?php foreach ($orders as $order): $customer = $order['customer']; ?>
     <article class="card order">
         <div class="card-head">
-            <div><h2><?= e($order['id']) ?> · <?= (int) $order['total'] ?> €</h2><p class="muted small"><?= e(date('j. n. Y H:i', strtotime($order['created_at']))) ?> · dobierka</p></div>
+            <div><h2><?= e($order['id']) ?> · <?= (int) $order['total'] ?> €</h2><p class="muted small"><?= e(date('j. n. Y H:i', strtotime($order['created_at']))) ?> · <?= !empty($order['paid_at']) ? 'zaplatené online' : (($order['payment'] ?? '') === 'dobierka' ? 'dobierka' : 'nezaplatené online') ?></p></div>
             <?= statusBadge(orderStatus($order), $orderStatusLabels) ?>
         </div>
         <div class="order-grid">
@@ -610,6 +610,7 @@ renderHeader('Rezervácie', 'bookings');
         <div class="booking-time"><b><?= e($booking['time']) ?></b><span><?= e($booking['end_time'] ?? '') ?></span></div>
         <div class="booking-main">
             <p class="booking-service"><?= e($booking['service_name']) ?> <span class="muted">· <?= e($booking['id']) ?></span></p>
+            <p class="muted small">Cena <?= (int) ($booking['price'] ?? 0) ?> € · <?= !empty($booking['paid_at']) ? 'zaplatené online' : (($booking['payment'] ?? '') === 'online' ? 'čaká na online platbu' : 'platba na mieste') ?></p>
             <p class="booking-customer"><strong><?= e($booking['name']) ?></strong> · <a href="tel:<?= e(str_replace(' ', '', $booking['phone'])) ?>"><?= e($booking['phone']) ?></a><?= $booking['email'] !== '' ? ' · <a href="mailto:' . e($booking['email']) . '">' . e($booking['email']) . '</a>' : '' ?></p>
             <?php if (($booking['bike'] ?? '') !== ''): ?><p class="muted small">Motorka: <?= e($booking['bike']) ?></p><?php endif; ?>
             <?php if (!empty($booking['pickup'])): ?><p class="pickup"><span>Vyzdvihnutie</span><?= e($booking['pickup_address']) ?></p><?php endif; ?>

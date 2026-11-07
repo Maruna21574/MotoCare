@@ -43,4 +43,42 @@
     if (serviceSelect && duration) {
         serviceSelect.addEventListener('change', () => { duration.value = ''; });
     }
+
+    // Photo preview in the same window (instead of a new tab) with arrows and keyboard.
+    const previewLinks = Array.from(document.querySelectorAll('a[data-preview]'));
+    if (previewLinks.length) {
+        const box = document.createElement('div');
+        box.className = 'preview';
+        box.hidden = true;
+        box.innerHTML = '<div class="preview-box" role="dialog" aria-modal="true" aria-label="Náhľad fotky"><button type="button" class="preview-close" aria-label="Zavrieť">×</button><button type="button" class="preview-nav preview-prev" aria-label="Predchádzajúca">‹</button><img alt=""><button type="button" class="preview-nav preview-next" aria-label="Ďalšia">›</button><p class="preview-count"></p></div>';
+        document.body.appendChild(box);
+        const image = box.querySelector('img');
+        const count = box.querySelector('.preview-count');
+        let current = 0;
+        const show = (index) => {
+            current = (index + previewLinks.length) % previewLinks.length;
+            const link = previewLinks[current];
+            image.src = link.getAttribute('href');
+            const label = link.closest('figure')?.querySelector('.gallery-tile-num')?.textContent.trim() || '';
+            count.textContent = `${current + 1} / ${previewLinks.length}${label ? ' — ' + label : ''}`;
+        };
+        const close = () => { box.hidden = true; image.removeAttribute('src'); document.body.style.overflow = ''; };
+        previewLinks.forEach((link, index) => link.addEventListener('click', (event) => {
+            event.preventDefault();
+            show(index);
+            box.hidden = false;
+            document.body.style.overflow = 'hidden';
+        }));
+        box.addEventListener('click', (event) => {
+            if (event.target === box || event.target.closest('.preview-close')) close();
+            else if (event.target.closest('.preview-prev')) show(current - 1);
+            else if (event.target.closest('.preview-next')) show(current + 1);
+        });
+        document.addEventListener('keydown', (event) => {
+            if (box.hidden) return;
+            if (event.key === 'Escape') close();
+            else if (event.key === 'ArrowLeft') show(current - 1);
+            else if (event.key === 'ArrowRight') show(current + 1);
+        });
+    }
 })();

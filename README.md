@@ -1,6 +1,6 @@
 # MotoCare Pro web
 
-PHP web pre MotoCare Pro: prezentácia služieb, online rezervácia v krokoch, e-shop s dobierkou a administrácia pre majiteľa. Bez databázy — dáta sú v JSON súboroch v `data/`.
+PHP web pre MotoCare Pro: prezentácia služieb, online rezervácia v krokoch, e-shop a rezervácie s platbou kartou (Stripe) a administrácia pre majiteľa. Bez databázy — dáta sú v JSON súboroch v `data/`.
 
 Podstránky: `sluzby.php`, `sluzba.php`, `galeria.php`, `o-nas.php`, `kontakt.php`, `rezervacia.php`, `shop.php`, `produkt.php`, `kosik.php`, `objednavka.php`.
 
@@ -19,6 +19,16 @@ Web používa adresy bez prípony, napr. `/kosik` a `/o-nas`. Zabezpečuje to `.
 ## Produkty bez ceny
 
 Produkt s cenou 0 (alebo prázdnou) sa zobrazí ako „Cena čoskoro“ a nedá sa objednať, kým v administrácii (Produkty) nenastavíš cenu. Nové produkty z `inc/catalog.php` sa pridajú príkazom `php admin/import-products.php` (existujúce produkty sa nemenia, dá sa spúšťať opakovane). Fotky sú v `produkty/<id produktu>.webp`. Na hostingu spusti príkaz po nahratí nových súborov, alebo produkty pridaj ručne v administrácii.
+
+## Platby (Stripe)
+
+Zákazník si vyberie spôsob platby. E-shop: kartou cez Stripe Checkout (hostovaná platobná stránka, údaje o karte web nevidí) alebo na dobierku. Rezervácia: kartou vopred alebo na mieste v štúdiu. Bez Stripe kľúčov je platba kartou vypnutá a ponúka sa len dobierka, resp. platba na mieste.
+
+1. V Stripe dashboarde (Developers > API keys) skopíruj *Secret key* (`sk_test_...` na skúšku, `sk_live_...` ostro).
+2. V Developers > Webhooks pridaj endpoint `https://<doména>/stripe-webhook.php` pre udalosti `checkout.session.completed` a `checkout.session.async_payment_succeeded` a skopíruj *Signing secret* (`whsec_...`).
+3. Do `inc/local.php` (podľa `inc/local.example.php`) pridaj `'stripe' => ['secret_key' => 'sk_...', 'webhook_secret' => 'whsec_...']`.
+
+Prechod späť na web po platbe platbu tiež overí, takže objednávka sa zapíše aj keď webhook meškal. Rezervácia platená kartou drží termín 30 minút, kým zákazník platí (stav „Čaká na platbu“), potom sa termín uvoľní. Nezaplatená objednávka sa v admine zobrazí až po zaplatení v „Na vybavenie“, ostatné nájdeš vo filtri „Všetky“. Vrátenie peňazí (zrušená rezervácia alebo objednávka) sa robí v Stripe dashboarde.
 
 ## Administrácia
 

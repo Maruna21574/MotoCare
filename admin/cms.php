@@ -41,6 +41,15 @@ function saveOrFail(string $file, array $data, string $back): void
     if (!saveJsonFile($file, $data)) { flash('Zmeny sa nepodarilo uložiť. Skontroluj práva na priečinok data.', 'error'); redirect($back); }
 }
 
+/** Admin gallery filter: "" = all, "bez" = photos without a bike, otherwise the bike slug. */
+function galleryMatches(array $item, string $filter): bool
+{
+    $bike = trim((string) ($item['bike'] ?? ''));
+    if ($filter === '') return true;
+    if ($filter === 'bez') return $bike === '';
+    return $bike !== '' && slugify($bike) === $filter;
+}
+
 function imageSrc(string $path): string
 {
     return preg_match('#^https?://#', $path) ? $path : '../' . $path;
@@ -269,9 +278,11 @@ if ($action === 'service_move') {
     redirect('p=services');
 }
 
+$galleryFilter = post('motorka', 60);
+$gf = $galleryFilter !== '' ? '&motorka=' . rawurlencode($galleryFilter) : '';
 if ($action === 'gallery_upload') {
     $files = uploadedFiles('photos');
-    if ($files === []) { flash('Vyber aspoň jednu fotku.', 'error'); redirect('p=gallery'); }
+    if ($files === []) { flash('Vyber aspoň jednu fotku.', 'error'); redirect('p=gallery' . $gf); }
     $bike = post('bike', 60);
     $added = 0;
     $errors = [];
@@ -285,10 +296,10 @@ if ($action === 'gallery_upload') {
             $errors[] = $file['name'] . ': ' . $exception->getMessage();
         }
     }
-    if ($added > 0) saveOrFail($galleryFile, array_values($gallery), 'p=gallery');
+    if ($added > 0) saveOrFail($galleryFile, array_values($gallery), 'p=gallery' . $gf);
     if ($added > 0) flash('Pridané fotky: ' . $added . '.');
     if ($errors !== []) flash(implode("\n", $errors), 'error');
-    redirect('p=gallery');
+    redirect('p=gallery' . $gf);
 }
 
 if ($action === 'gallery_bike_rename') {
@@ -303,32 +314,39 @@ if ($action === 'gallery_bike_rename') {
     }
     unset($item);
     if ($changed > 0) {
-        saveOrFail($galleryFile, array_values($gallery), 'p=gallery');
+        saveOrFail($galleryFile, array_values($gallery), 'p=gallery' . $gf);
         flash('Motorka „' . $old . '“: zmenených fotiek ' . $changed . '.');
     }
-    redirect('p=gallery');
+    redirect('p=gallery' . $gf);
 }
 
-if (in_array($action, ['gallery_delete','gallery_move', 'gallery_slider'], true)) {
+if (in_array($action, ['gallery_delete','gallery_move', 'gallery_slider', 'gallery_bike'], true)) {
     $index = (int) post('id', 10);
-    if (!isset($gallery[$index]) || $gallery[$index]['src'] !== post('src', 500)) { flash('Galéria sa medzitým zmenila, skús to znova.', 'error'); redirect('p=gallery'); }
+    if (!isset($gallery[$index]) || $gallery[$index]['src'] !== post('src', 500)) { flash('Galéria sa medzitým zmenila, skús to znova.', 'error'); redirect('p=gallery' . $gf); }
     if ($action === 'gallery_delete') {
         $src = $gallery[$index]['src'];
         $thumb = (string) ($gallery[$index]['thumb'] ?? '');
         array_splice($gallery, $index, 1);
-        saveOrFail($galleryFile, $gallery, 'p=gallery');
+        saveOrFail($galleryFile, $gallery, 'p=gallery' . $gf);
         deleteUploadIfUnused($src);
         if (preg_match('#^uploads/t/[a-z0-9-]+\.webp$#', $thumb) && !str_contains((string) file_get_contents($galleryFile), $thumb)) @unlink($uploadsDir . DIRECTORY_SEPARATOR . 't' . DIRECTORY_SEPARATOR . basename($thumb));
         flash('Fotka je odstránená z galérie.');
+    } elseif ($action === 'gallery_bike') {
+        $bikeName = post('bike', 60);
+        if ($bikeName === '') unset($gallery[$index]['bike']); else $gallery[$index]['bike'] = $bikeName;
+        saveOrFail($galleryFile, $gallery, 'p=gallery' . $gf);
+        flash('Motorka pri fotke bola uložená.');
     } elseif ($action === 'gallery_move') {
-        $target = post('direction', 4) === 'up' ? $index - 1 : $index + 1;
+        $step = post('direction', 4) === 'up' ? -1 : 1;
+        $target = $index + $step;
+        while (isset($gallery[$target]) && !galleryMatches($gallery[$target], $galleryFilter)) $target += $step;
         if (isset($gallery[$target])) [$gallery[$index], $gallery[$target]] = [$gallery[$target], $gallery[$index]];
-        saveOrFail($galleryFile, $gallery, 'p=gallery');
+        saveOrFail($galleryFile, $gallery, 'p=gallery' . $gf);
     } else {
         $gallery[$index]['slider'] = empty($gallery[$index]['slider']);
-        saveOrFail($galleryFile, $gallery, 'p=gallery');
+        saveOrFail($galleryFile, $gallery, 'p=gallery' . $gf);
     }
-    redirect('p=gallery#foto-' . $index);
+    redirect('p=gallery' . $gf . '#foto-' . $index);
 }
 
 if ($action === 'texts_save') {
@@ -639,29 +657,44 @@ if ($page === 'gallery') {
     renderHeader('Galéria', 'gallery');
     $last = count($gallery) - 1;
     $bikes = galleryBikes($gallery);
+    $filter = cleanText($_GET['motorka'] ?? '', 60);
+    if ($filter !== 'bez' && !isset($bikes[$filter])) $filter = '';
+    $withoutBike = count(array_filter($gallery, static fn (array $item): bool => galleryMatches($item, 'bez')));
+    $shown = array_filter($gallery, static fn (array $item): bool => galleryMatches($item, $filter));
+    $filterLabel = $filter === 'bez' ? 'Bez motorky' : ($filter !== '' ? $bikes[$filter]['label'] : '');
+    $chip = static fn (string $slug, string $label, int $count): string => '<a class="chip' . ($slug === $filter ? ' is-active' : '') . '" href="index.php?p=gallery' . ($slug !== '' ? '&amp;motorka=' . e(rawurlencode($slug)) : '') . '">' . e($label) . ' <small>' . $count . '</small></a>';
     ?>
-    <div class="page-head"><div><h1>Galéria</h1><p class="muted">Fotky na stránke Galéria. Fotky označené „Na úvode“ sa zobrazujú aj v pase fotiek na úvodnej stránke.</p></div></div>
+    <div class="page-head"><div><h1>Galéria</h1><p class="muted">Vyber motorku a uvidíš len jej fotky. Fotky môžeš pridávať, presúvať medzi motorkami alebo odstrániť. Fotky označené „Na úvode“ sa zobrazujú aj v páse fotiek na úvodnej stránke.</p></div></div>
+    <nav class="chips" aria-label="Filter podľa motorky">
+        <?= $chip('', 'Všetky', count($gallery)) ?>
+        <?php foreach ($bikes as $slug => $info): ?><?= $chip((string) $slug, $info['label'], (int) $info['count']) ?><?php endforeach; ?>
+        <?php if ($withoutBike > 0): ?><?= $chip('bez', 'Bez motorky', $withoutBike) ?><?php endif; ?>
+    </nav>
     <form class="card upload-card" method="post" enctype="multipart/form-data">
-        <?= csrfField() ?><input type="hidden" name="action" value="gallery_upload">
-        <label>Motorka <small>nepovinné, podľa nej sa filtruje v galérii</small><input type="text" name="bike" maxlength="60" list="bike-list" placeholder="napr. BMW R1300 GS"><datalist id="bike-list"><?php foreach ($bikes as $info): ?><option value="<?= e($info['label']) ?>"><?php endforeach; ?></datalist></label>
+        <?= csrfField() ?><input type="hidden" name="action" value="gallery_upload"><input type="hidden" name="motorka" value="<?= e($filter) ?>">
+        <label>Motorka <small>nepovinné · nový názov vytvorí novú motorku (filter)</small><input type="text" name="bike" maxlength="60" list="bike-list" value="<?= e($filter !== '' && $filter !== 'bez' ? $filterLabel : '') ?>" placeholder="napr. BMW R1300 GS"><datalist id="bike-list"><?php foreach ($bikes as $info): ?><option value="<?= e($info['label']) ?>"><?php endforeach; ?></datalist></label>
         <label>Pridať fotky <small>môžeš vybrať viac naraz · JPG, PNG alebo WEBP</small><input type="file" name="photos[]" accept="image/jpeg,image/png,image/webp" multiple required></label>
         <button class="btn btn--primary" type="submit">Nahrať do galérie</button>
     </form>
-    <?php if ($bikes !== []): ?>
-    <div class="card"><h2>Motorky v galérii</h2><p class="muted">Názov motorky sa zobrazuje ako filter v galérii. Zmeníš ho pre všetky jej fotky naraz; prázdny názov motorku z fotiek odstráni.</p>
-        <?php foreach ($bikes as $info): ?><form method="post" class="upload-card"><?= csrfField() ?><input type="hidden" name="action" value="gallery_bike_rename"><input type="hidden" name="old" value="<?= e($info['label']) ?>"><label><?= (int) $info['count'] ?> fotiek<input type="text" name="new" maxlength="60" value="<?= e($info['label']) ?>"></label><button class="btn" type="submit">Premenovať</button></form><?php endforeach; ?>
-    </div>
+    <?php if ($filter !== '' && $filter !== 'bez'): ?>
+    <form method="post" class="card upload-card"><?= csrfField() ?><input type="hidden" name="action" value="gallery_bike_rename"><input type="hidden" name="old" value="<?= e($filterLabel) ?>">
+        <label>Názov motorky <small>zmeníš ho pre všetkých <?= (int) $bikes[$filter]['count'] ?> fotiek · prázdny názov motorku z fotiek odstráni</small><input type="text" name="new" maxlength="60" value="<?= e($filterLabel) ?>"></label>
+        <button class="btn" type="submit">Premenovať</button>
+    </form>
     <?php endif; ?>
+    <h2 class="gallery-admin-title"><?= $filterLabel !== '' ? e($filterLabel) : 'Všetky fotky' ?> <small class="muted"><?= count($shown) ?> fotiek</small></h2>
+    <?php if ($shown === []): ?><div class="card"><p class="muted">V tejto galérii zatiaľ nie sú žiadne fotky. Pridaj ich formulárom vyššie.</p></div><?php endif; ?>
     <div class="gallery-admin">
-        <?php foreach ($gallery as $index => $item): $fields = csrfField() . '<input type="hidden" name="id" value="' . $index . '"><input type="hidden" name="src" value="' . e($item['src']) . '">'; ?>
+        <?php foreach ($shown as $index => $item): $fields = csrfField() . '<input type="hidden" name="id" value="' . $index . '"><input type="hidden" name="src" value="' . e($item['src']) . '"><input type="hidden" name="motorka" value="' . e($filter) . '">'; ?>
         <figure class="gallery-tile<?= empty($item['slider']) ? '' : ' is-slider' ?>" id="foto-<?= $index ?>">
-            <a href="<?= e(imageSrc($item['src'])) ?>" target="_blank"><img src="<?= e(imageSrc($item['src'])) ?>" alt="" loading="lazy"></a>
+            <a href="<?= e(imageSrc($item['src'])) ?>" data-preview title="Zobraziť fotku"><img src="<?= e(imageSrc($item['thumb'] ?? $item['src'])) ?>" alt="" loading="lazy"></a>
             <span class="gallery-tile-num"><?= $index + 1 ?><?= !empty($item['bike']) ? ' · ' . e($item['bike']) : '' ?></span>
+            <form method="post" class="gallery-tile-bike"><?= $fields ?><input type="hidden" name="action" value="gallery_bike"><input type="text" name="bike" maxlength="60" list="bike-list" value="<?= e((string) ($item['bike'] ?? '')) ?>" placeholder="Motorka" aria-label="Motorka pri fotke"><button class="btn btn--small" type="submit">Uložiť</button></form>
             <figcaption>
                 <form method="post"><?= $fields ?><input type="hidden" name="action" value="gallery_slider"><button class="btn btn--small<?= empty($item['slider']) ? '' : ' btn--on' ?>" type="submit" title="Zobrazovať na úvodnej stránke"><?= empty($item['slider']) ? 'Nie na úvode' : '✓ Na úvode' ?></button></form>
                 <span class="gallery-tile-move">
-                    <form method="post"><?= $fields ?><input type="hidden" name="action" value="gallery_move"><input type="hidden" name="direction" value="up"><button class="btn btn--small btn--icon" type="submit" title="Posunúť dopredu" <?= $index === 0 ? 'disabled' : '' ?>>←</button></form>
-                    <form method="post"><?= $fields ?><input type="hidden" name="action" value="gallery_move"><input type="hidden" name="direction" value="down"><button class="btn btn--small btn--icon" type="submit" title="Posunúť dozadu" <?= $index === $last ? 'disabled' : '' ?>>→</button></form>
+                    <form method="post"><?= $fields ?><input type="hidden" name="action" value="gallery_move"><input type="hidden" name="direction" value="up"><button class="btn btn--small btn--icon" type="submit" title="Posunúť dopredu" <?= $index === array_key_first($shown) ? 'disabled' : '' ?>>←</button></form>
+                    <form method="post"><?= $fields ?><input type="hidden" name="action" value="gallery_move"><input type="hidden" name="direction" value="down"><button class="btn btn--small btn--icon" type="submit" title="Posunúť dozadu" <?= $index === array_key_last($shown) ? 'disabled' : '' ?>>→</button></form>
                     <form method="post" data-confirm="Odstrániť fotku z galérie?"><?= $fields ?><input type="hidden" name="action" value="gallery_delete"><button class="btn btn--small btn--ghost-danger btn--icon" type="submit" title="Odstrániť">×</button></form>
                 </span>
             </figcaption>

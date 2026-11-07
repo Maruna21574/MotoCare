@@ -64,6 +64,26 @@ function rateLimited(string $action, int $max, int $window): bool
     });
 }
 
+/** Stores the Stripe session on a booking or order so the payment can be matched later. */
+function attachStripeSession(string $file, string $id, array $session): void
+{
+    updateJsonFile($file, static function (array &$records) use ($id, $session): void {
+        foreach ($records as &$record) {
+            if (($record['id'] ?? '') === $id) { $record['stripe_session'] = (string) $session['id']; return; }
+        }
+    });
+}
+
+/** Cancels an unpaid record when the payment page could not be created, so its slot is free again. */
+function discardUnpaid(string $file, string $id): void
+{
+    updateJsonFile($file, static function (array &$records) use ($id): void {
+        foreach ($records as &$record) {
+            if (($record['id'] ?? '') === $id && ($record['status'] ?? '') === 'unpaid') $record['status'] = 'cancelled';
+        }
+    });
+}
+
 $action = cleanText($_GET['action'] ?? '', 50);
 
 if ($action === 'availability') {
@@ -99,22 +119,25 @@ if ($action === 'book' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($pickup && $pickupAddress === '') apiResponse(['ok' => false, 'message' => 'Zadaj prosím adresu, kde máme motorku vyzdvihnúť.'], 422);
     if (!isset($services[$serviceId]) || !validDate($date) || !preg_match('/^\d{2}:\d{2}$/', $time) || $name === '' || $phone === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) apiResponse(['ok' => false, 'message' => 'Skontroluj prosím všetky povinné údaje.'], 422);
     if (empty($data['consent'])) apiResponse(['ok' => false, 'message' => 'Na odoslanie rezervácie potrebujeme tvoj súhlas so spracovaním údajov.'], 422);
+    $payment = ($data['payment'] ?? '') === 'onsite' ? 'onsite' : 'online';
+    if ($payment === 'online' && !stripeConfigured()) apiResponse(['ok' => false, 'message' => 'Platba kartou momentálne nie je dostupná. Vyber platbu na mieste alebo nám zavolaj.'], 503);
     if (rateLimited('book', 6, 3600)) apiResponse(['ok' => false, 'message' => 'Z tvojho pripojenia prišlo priveľa rezervácií. Zavolaj nám prosím.'], 429);
 
+    $holdUntil = time() + 1900; // Stripe needs a session of at least 30 minutes; the slot is held for that long
     $service = $services[$serviceId];
     $blocks = readJsonFile($blocksFile);
     try {
-        $booking = updateJsonFile($bookingsFile, static function (array &$bookings) use ($service, $serviceId, $date, $time, $name, $phone, $email, $bike, $note, $pickup, $pickupAddress, $blocks): ?array {
+        $booking = updateJsonFile($bookingsFile, static function (array &$bookings) use ($service, $serviceId, $holdUntil, $payment, $date, $time, $name, $phone, $email, $bike, $note, $pickup, $pickupAddress, $blocks): ?array {
             $slots = availableSlots($date, (int) $service['minutes'], $bookings, $blocks);
             $selected = array_values(array_filter($slots, static fn (array $slot): bool => $slot['time'] === $time && $slot['available']));
             if ($selected === []) return null;
             $booking = [
-                'id' => newId('MC'), 'created_at' => date('c'), 'status' => 'pending', 'source' => 'web',
+                'id' => newId('MC'), 'created_at' => date('c'), 'status' => $payment === 'online' ? 'unpaid' : 'pending', 'source' => 'web', 'payment' => $payment,
                 'service' => $serviceId, 'service_name' => $service['name'], 'price' => $service['price'],
                 'duration' => occupiedMinutes($date, (int) $service['minutes']), 'date' => $date, 'time' => $time, 'end_time' => $selected[0]['end'],
                 'name' => $name, 'phone' => $phone, 'email' => $email, 'bike' => $bike, 'note' => $note,
                 'pickup' => $pickup, 'pickup_address' => $pickupAddress,
-            ];
+            ] + ($payment === 'online' ? ['hold_until' => date('c', $holdUntil)] : []);
             $bookings[] = $booking;
             return $booking;
         });
@@ -122,11 +145,43 @@ if ($action === 'book' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         apiResponse(['ok' => false, 'message' => 'Rezerváciu sa nepodarilo uložiť. Skús nám prosím zavolať.'], 500);
     }
     if ($booking === null) apiResponse(['ok' => false, 'message' => 'Tento termín už nie je voľný. Vyber prosím iný.'], 409);
-    sendBookingMail($booking, 'received');
-    sendBookingOwnerMail($booking);
-    apiResponse(['ok' => true, 'message' => 'Termín je rezervovaný.', 'booking' => ['id' => $booking['id'], 'date' => $booking['date'], 'label' => formatDateSk($booking['date']), 'time' => $booking['time'], 'end_time' => $booking['end_time'], 'service_name' => $booking['service_name'], 'email' => $booking['email']]]);
+    if ($payment === 'onsite') {
+        sendBookingMail($booking, 'received');
+        sendBookingOwnerMail($booking);
+        apiResponse(['ok' => true, 'message' => 'Termín je rezervovaný.', 'booking' => ['id' => $booking['id'], 'date' => $booking['date'], 'label' => formatDateSk($booking['date']), 'time' => $booking['time'], 'end_time' => $booking['end_time'], 'service_name' => $booking['service_name'], 'email' => $booking['email']]]);
+    }
+    try {
+        $session = stripeCreateCheckout(
+            'booking', $booking['id'], $booking['email'],
+            [[$booking['service_name'] . ' — ' . formatDateSk($booking['date'], false) . ' ' . $booking['time'], $booking['price'], 1]],
+            siteUrl('rezervacia?platba_id={CHECKOUT_SESSION_ID}'),
+            siteUrl('rezervacia?service=' . rawurlencode($serviceId) . '&platba=zrusena'),
+            $holdUntil
+        );
+        attachStripeSession($bookingsFile, $booking['id'], $session);
+    } catch (RuntimeException $exception) {
+        discardUnpaid($bookingsFile, $booking['id']);
+        apiResponse(['ok' => false, 'message' => 'Platobnú bránu sa nepodarilo otvoriť. Skús to prosím znova alebo nám zavolaj.'], 502);
+    }
+    apiResponse(['ok' => true, 'message' => 'Presmerovávame na platbu.', 'checkout_url' => $session['url']]);
 }
 
+if ($action === 'payment_confirm') {
+    $sessionId = cleanText($_GET['session_id'] ?? '', 200);
+    if (!preg_match('/^cs_[A-Za-z0-9_]+$/', $sessionId)) apiResponse(['ok' => false, 'message' => 'Neplatná platba.'], 422);
+    try {
+        $session = stripeRequest('GET', 'checkout/sessions/' . $sessionId);
+    } catch (RuntimeException $exception) {
+        apiResponse(['ok' => false, 'message' => 'Platbu sa nepodarilo overiť. Ak ti z účtu odišli peniaze, napíš nám prosím.'], 502);
+    }
+    $record = stripeApplyPaidSession($session);
+    if ($record === null) apiResponse(['ok' => true, 'paid' => false, 'message' => 'Platba zatiaľ nebola dokončená.']);
+    $kind = (string) ($session['metadata']['kind'] ?? '');
+    if ($kind === 'booking') {
+        apiResponse(['ok' => true, 'paid' => true, 'kind' => 'booking', 'booking' => ['id' => $record['id'], 'label' => formatDateSk($record['date']), 'time' => $record['time'], 'end_time' => $record['end_time'], 'service_name' => $record['service_name'], 'email' => $record['email'], 'price' => $record['price']]]);
+    }
+    apiResponse(['ok' => true, 'paid' => true, 'kind' => 'order', 'order' => ['id' => $record['id'], 'total' => $record['total'], 'email' => $record['customer']['email']]]);
+}
 if ($action === 'shop_order' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = requestData();
     $customer = is_array($data['customer'] ?? null) ? $data['customer'] : [];
@@ -141,6 +196,8 @@ if ($action === 'shop_order' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $note = cleanText($customer['note'] ?? '', 500);
     if ($name === '' || $phone === '' || $address === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || $cart === []) apiResponse(['ok' => false, 'message' => 'Vyplň prosím kontaktné údaje a aspoň jeden produkt.'], 422);
     if (empty($customer['consent'])) apiResponse(['ok' => false, 'message' => 'Na odoslanie objednávky potrebujeme tvoj súhlas so spracovaním údajov.'], 422);
+    $payment = ($customer['payment'] ?? '') === 'dobierka' ? 'dobierka' : 'online';
+    if ($payment === 'online' && !stripeConfigured()) apiResponse(['ok' => false, 'message' => 'Platba kartou momentálne nie je dostupná. Vyber platbu na dobierku alebo nám zavolaj.'], 503);
     if (rateLimited('order', 6, 3600)) apiResponse(['ok' => false, 'message' => 'Z tvojho pripojenia prišlo priveľa objednávok. Zavolaj nám prosím.'], 429);
     $items = [];
     $total = 0;
@@ -152,15 +209,31 @@ if ($action === 'shop_order' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $total += $products[$id]['price'] * $quantity;
     }
     if ($items === []) apiResponse(['ok' => false, 'message' => 'Košík je prázdny.'], 422);
-    $order = ['id' => newId('OBJ'), 'created_at' => date('c'), 'status' => 'new', 'payment' => 'dobierka', 'customer' => ['name' => $name, 'phone' => $phone, 'email' => $email, 'address' => $address, 'ico' => $ico, 'dic' => $dic, 'note' => $note], 'items' => $items, 'total' => $total];
+    $order = ['id' => newId('OBJ'), 'created_at' => date('c'), 'status' => $payment === 'online' ? 'unpaid' : 'new', 'payment' => $payment, 'customer' => ['name' => $name, 'phone' => $phone, 'email' => $email, 'address' => $address, 'ico' => $ico, 'dic' => $dic, 'note' => $note], 'items' => $items, 'total' => $total];
     try {
         updateJsonFile($ordersFile, static function (array &$orders) use ($order): void { $orders[] = $order; });
     } catch (RuntimeException $exception) {
         apiResponse(['ok' => false, 'message' => 'Objednávku sa nepodarilo uložiť.'], 500);
     }
-    sendOrderMail($order, 'received');
-    sendOrderOwnerMail($order);
-    apiResponse(['ok' => true, 'message' => 'Objednávka prijatá.', 'order' => ['id' => $order['id'], 'total' => $total]]);
+    if ($payment === 'dobierka') {
+        sendOrderMail($order, 'received');
+        sendOrderOwnerMail($order);
+        apiResponse(['ok' => true, 'message' => 'Objednávka prijatá.', 'order' => ['id' => $order['id'], 'total' => $total]]);
+    }
+    try {
+        $session = stripeCreateCheckout(
+            'order', $order['id'], $email,
+            array_map(static fn (array $item): array => [$item['name'], $item['price'], $item['quantity']], $items),
+            siteUrl('objednavka?platba_id={CHECKOUT_SESSION_ID}'),
+            siteUrl('objednavka?platba=zrusena'),
+            time() + 86000
+        );
+        attachStripeSession($ordersFile, $order['id'], $session);
+    } catch (RuntimeException $exception) {
+        discardUnpaid($ordersFile, $order['id']);
+        apiResponse(['ok' => false, 'message' => 'Platobnú bránu sa nepodarilo otvoriť. Skús to prosím znova alebo nám zavolaj.'], 502);
+    }
+    apiResponse(['ok' => true, 'message' => 'Presmerovávame na platbu.', 'checkout_url' => $session['url']]);
 }
 
 if ($action === 'contact' && $_SERVER['REQUEST_METHOD'] === 'POST') {

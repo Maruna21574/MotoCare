@@ -250,16 +250,16 @@
         "thumb": "uploads/t/galeria-suzuki-bandit-005.webp"
     },
     {
-        "src": "uploads/galeria-ktm-1290-super-adventure-002.webp",
-        "slider": false,
-        "bike": "KTM 1290 Super Adventure",
-        "thumb": "uploads/t/galeria-ktm-1290-super-adventure-002.webp"
-    },
-    {
         "src": "uploads/galeria-honda-transalp-004.webp",
         "slider": false,
         "bike": "Honda Transalp",
         "thumb": "uploads/t/galeria-honda-transalp-004.webp"
+    },
+    {
+        "src": "uploads/galeria-ktm-1290-super-adventure-002.webp",
+        "slider": false,
+        "bike": "KTM 1290 Super Adventure",
+        "thumb": "uploads/t/galeria-ktm-1290-super-adventure-002.webp"
     },
     {
         "src": "uploads/galeria-honda-varadero-002.webp",

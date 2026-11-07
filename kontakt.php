@@ -99,7 +99,10 @@ $prefillMessage = $prefillModel !== '' ? 'Mám záujem o: ' . $prefillModel . "\
 <section id="kontaktna-mapa" class="ct-map section-dark">
     <div class="container">
         <div class="ct-map-frame">
-            <iframe src="<?= e($site['map_embed']) ?>" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" title="MotoCare Pro na mape"></iframe>
+            <div class="consent-holder" data-consent-holder>
+                <div class="consent-placeholder"><p>Mapa Google sa zobrazí až po povolení funkčných cookies.</p><button type="button" class="button button--orange" data-cookie-allow-category="functional">Zobraziť mapu</button></div>
+                <iframe data-consent="functional" data-src="<?= e($site['map_embed']) ?>" allowfullscreen="" referrerpolicy="strict-origin-when-cross-origin" title="MotoCare Pro na mape"></iframe>
+            </div>
             <div class="ct-map-card">
                 <p class="eyebrow"><span class="eyebrow-line"></span> <?= t('contact.map_eyebrow') ?></p>
                 <h2><?= t('contact.map_title') ?></h2>

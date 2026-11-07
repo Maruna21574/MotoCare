@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/inc/config.php';
-$pageTitle = 'Objednávka na dobierku — MotoCare produkty';
+$pageTitle = 'Objednávka — MotoCare produkty';
 $activePage = 'shop';
 $bodyClass = 'page-plain';
 include __DIR__ . '/inc/header.php';
@@ -49,13 +49,19 @@ $icon = static fn (string $paths): string => '<span class="co-section-icon"><svg
                         </div>
                     </fieldset>
 
+                        <fieldset class="pay-choice">
+                            <legend>Spôsob platby</legend>
+                            <?php $stripeOn = stripeConfigured(); ?>
+                            <label><input type="radio" name="payment" value="online" <?= $stripeOn ? 'checked' : 'disabled' ?>><span><strong>Zaplatiť online</strong><small><?= $stripeOn ? 'Bezpečná online platba kartou. Údaje o karte web nevidí.' : 'Online platba zatiaľ nie je dostupná.' ?></small></span></label>
+                            <label><input type="radio" name="payment" value="dobierka" <?= $stripeOn ? '' : 'checked' ?>><span><strong>Na dobierku</strong><small>Zaplatíš až pri prevzatí zásielky.</small></span></label>
+                        </fieldset>
                     <div class="co-submit">
                         <label class="book-option book-consent">
                             <input type="checkbox" name="consent" value="1" required>
                             <span class="book-option-box" aria-hidden="true"></span>
                             <span class="book-option-text">Súhlasím so <a href="gdpr" target="_blank">spracovaním osobných údajov</a> za účelom vybavenia objednávky.</span>
                         </label>
-                        <button class="button button--orange co-submit-button" type="submit">Odoslať objednávku na dobierku</button>
+                        <button class="button button--orange co-submit-button" type="submit" data-submit-label>Zaplatiť kartou</button>
                         <p class="form-message" id="checkout-message" role="status" aria-live="polite"></p>
                         <a class="shop-card-detail" href="kosik"><span aria-hidden="true">←</span> Späť do košíka</a>
                     </div>
@@ -71,7 +77,7 @@ $icon = static fn (string $paths): string => '<span class="co-section-icon"><svg
                         <div class="co-done-ticket-main"><small>Číslo objednávky</small><strong id="checkout-done-id">—</strong></div>
                         <dl>
                             <div><dt>Suma</dt><dd id="checkout-done-total">—</dd></div>
-                            <div><dt>Platba</dt><dd>Na dobierku</dd></div>
+                            <div><dt>Platba</dt><dd data-payment-label>Online kartou</dd></div>
                             <div><dt>Doprava</dt><dd>Dohodou</dd></div>
                         </dl>
                     </div>
@@ -79,7 +85,7 @@ $icon = static fn (string $paths): string => '<span class="co-section-icon"><svg
                     <ol class="co-done-steps">
                         <li><span>01</span><strong>Potvrdenie e-mailom</strong><small>Rekapituláciu nájdeš vo svojej schránke.</small></li>
                         <li><span>02</span><strong>Ozveme sa ti</strong><small>Dohodneme spôsob a cenu doručenia.</small></li>
-                        <li><span>03</span><strong>Zaplatíš pri prevzatí</strong><small>Priamo kuriérovi pri doručení.</small></li>
+                        <li><span>03</span><strong>Platba</strong><small>Kartou už máš zaplatené. Pri dobierke zaplatíš kuriérovi pri doručení.</small></li>
                     </ol>
                     <div class="co-done-actions"><a class="button button--orange" href="shop">Pokračovať v nákupe</a><a class="book-back" href="./">Späť na úvod</a></div>
                 </div>
@@ -90,11 +96,11 @@ $icon = static fn (string $paths): string => '<span class="co-section-icon"><svg
                 <div id="checkout-items" class="co-items"></div>
                 <dl class="co-totals">
                     <div><dt>Doprava</dt><dd>Dohodou</dd></div>
-                    <div><dt>Platba</dt><dd>Na dobierku</dd></div>
+                    <div><dt>Platba</dt><dd data-payment-label>Online kartou</dd></div>
                     <div class="co-total"><dt>Spolu</dt><dd id="checkout-total">0 €</dd></div>
                 </dl>
                 <ul class="co-perks">
-                    <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>Zaplatíš až pri prevzatí</li>
+                    <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>Platba online alebo na dobierku</li>
                     <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>Potvrdenie objednávky e-mailom</li>
                     <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>Radi poradíme s použitím</li>
                 </ul>

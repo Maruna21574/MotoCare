@@ -298,17 +298,24 @@
             loadMonth();
         };
 
+        const payMode = () => $('input[name="payment"]:checked', bookForm)?.value || 'onsite';
+        const submitLabel = () => (payMode() === 'online' ? 'Zaplatiť a rezervovať' : 'Odoslať rezerváciu');
+        const syncPay = () => { const button = $('[data-submit-label]', bookForm); if (button && !button.disabled) button.textContent = submitLabel(); };
+        $$('input[name="payment"]', bookForm).forEach((radio) => radio.addEventListener('change', syncPay));
+        syncPay();
+
         const renderSummary = () => {
             const service = services[serviceId()] || {};
             const data = new FormData(bookForm);
             const rows = [
-                ['Služba', `${service.name} (od ${service.price} €)`],
+                ['Služba', `${service.name}`],
                 ['Termín', `${selectedSlot?.label || dateInput.value}, ${timeInput.value} – ${selectedSlot?.end || ''}`],
                 ['Meno', data.get('name')],
                 ['Telefón', data.get('phone')],
                 ['E-mail', data.get('email')],
                 ['Motorka', data.get('bike')],
                 ['Vyzdvihnutie', data.get('pickup') ? `Áno — ${data.get('pickup_address')}` : ''],
+                ['K úhrade', payMode() === 'online' ? `${service.price} € — online vopred` : `${service.price} € — na mieste v štúdiu`],
                 ['Poznámka', data.get('note')],
             ].filter(([, value]) => value);
             $('#book-summary').innerHTML = rows.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join('');
@@ -338,6 +345,7 @@
         bookForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             if (step !== 4) return;
+            let redirecting = false;
             const consent = $('input[name="consent"]', bookForm);
             if (!consent.reportValidity()) return;
             const submit = $('button[type="submit"]', bookForm);
@@ -352,18 +360,43 @@
                     if (response.status === 409) { resetDate(); autoPick = false; toast(result.message); showStep(2); }
                     return;
                 }
+                if (result.checkout_url) { redirecting = true; submit.textContent = 'Presmerovávam na platbu…'; window.location.href = result.checkout_url; return; }
                 const booking = result.booking;
                 $('#book-done-text').textContent = `Rezervácia ${booking.id} na ${booking.label || booking.date} o ${booking.time} je zapísaná. Súhrn sme poslali na ${booking.email}. Termín ti čoskoro potvrdíme.`;
                 showStep('done');
             } catch (error) {
                 setMessage('Rezerváciu sa nepodarilo odoslať. Skús to znova alebo nám zavolaj.', 'error');
             } finally {
-                submit.disabled = false;
-                submit.textContent = 'Odoslať rezerváciu';
+                if (!redirecting) {
+                    submit.disabled = false;
+                    submit.textContent = submitLabel();
+                }
             }
         });
 
         showStep(Number(bookForm.dataset.startStep) || 1);
+
+        // Return from the payment page: confirm the payment and show the result.
+        const returned = new URLSearchParams(window.location.search);
+        if (returned.get('platba_id')) {
+            showStep('done');
+            const doneText = $('#book-done-text');
+            doneText.textContent = 'Overujeme platbu…';
+            fetch(`api.php?action=payment_confirm&session_id=${encodeURIComponent(returned.get('platba_id'))}`, { headers: { Accept: 'application/json' } })
+                .then((response) => response.json())
+                .then((result) => {
+                    if (result.ok && result.paid) {
+                        const booking = result.booking;
+                        doneText.textContent = `Platba prebehla úspešne. Rezervácia ${booking.id} na ${booking.label} o ${booking.time} je zapísaná. Potvrdenie sme poslali na ${booking.email}. Termín ti čoskoro potvrdíme.`;
+                        history.replaceState(null, '', window.location.pathname);
+                    } else {
+                        doneText.textContent = result.message || 'Platba zatiaľ nebola dokončená. Ak ti z účtu odišli peniaze, napíš nám prosím.';
+                    }
+                })
+                .catch(() => { doneText.textContent = 'Platbu sa nepodarilo overiť. Ak ti z účtu odišli peniaze, napíš nám prosím.'; });
+        } else if (returned.get('platba') === 'zrusena') {
+            setMessage('Platba bola zrušená, rezerváciu sme neuložili. Môžeš to skúsiť znova.', 'error');
+        }
     }
 
     // Contact form.
@@ -516,6 +549,15 @@
     const checkoutItems = $('#checkout-items');
     const checkoutTotal = $('#checkout-total');
     const checkoutMessage = $('#checkout-message');
+    const checkoutPayMode = () => $('input[name="payment"]:checked', checkoutForm)?.value || 'dobierka';
+    const checkoutSubmitLabel = () => (checkoutPayMode() === 'online' ? 'Zaplatiť online' : 'Odoslať objednávku na dobierku');
+    const syncCheckoutPay = () => {
+        if (!checkoutForm) return;
+        const button = $('[data-submit-label]', checkoutForm);
+        if (button && !button.disabled) button.textContent = checkoutSubmitLabel();
+        $$('[data-payment-label]').forEach((el) => { el.textContent = checkoutPayMode() === 'online' ? 'Online' : 'Na dobierku'; });
+    };
+    if (checkoutForm) { $$('input[name="payment"]', checkoutForm).forEach((radio) => radio.addEventListener('change', syncCheckoutPay)); syncCheckoutPay(); }
     const renderCheckout = () => {
         if (!checkoutItems) return;
         checkoutItems.innerHTML = cart.length ? cart.map((item) => {
@@ -539,6 +581,7 @@
         checkoutForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             if (!cart.length) { checkoutMessage.textContent = 'Košík je prázdny.'; checkoutMessage.className = 'form-message is-error'; return; }
+            let redirecting = false;
             const submit = $('button[type="submit"]', checkoutForm);
             submit.disabled = true;
             submit.textContent = 'Odosielam…';
@@ -548,6 +591,7 @@
                 const response = await fetch('api.php?action=shop_order', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ customer, cart }) });
                 const result = await response.json();
                 if (!result.ok) throw new Error(result.message || 'Objednávku sa nepodarilo odoslať.');
+                if (result.checkout_url) { redirecting = true; submit.textContent = 'Presmerovávam na platbu…'; window.location.href = result.checkout_url; return; }
                 $('#checkout-done-text').textContent = `Potvrdenie sme poslali na ${customer.email}. Čoskoro sa ti ozveme kvôli doručeniu.`;
                 $('#checkout-done-id').textContent = result.order.id;
                 $('#checkout-done-total').textContent = `${result.order.total} €`;
@@ -566,10 +610,46 @@
                 checkoutMessage.textContent = error.message;
                 checkoutMessage.className = 'form-message is-error';
             } finally {
-                submit.disabled = false;
-                submit.textContent = 'Odoslať objednávku na dobierku';
+                if (!redirecting) {
+                    submit.disabled = false;
+                    submit.textContent = checkoutSubmitLabel();
+                }
             }
         });
+    }
+
+    // Return from the payment page: confirm the payment and show the result.
+    if (checkoutForm) {
+        const returned = new URLSearchParams(window.location.search);
+        if (returned.get('platba_id')) {
+            fetch(`api.php?action=payment_confirm&session_id=${encodeURIComponent(returned.get('platba_id'))}`, { headers: { Accept: 'application/json' } })
+                .then((response) => response.json())
+                .then((result) => {
+                    if (result.ok && result.paid) {
+                        $('#checkout-done-text').textContent = `Platba prebehla úspešne. Potvrdenie sme poslali na ${result.order.email}. Čoskoro sa ti ozveme kvôli doručeniu.`;
+                        $('#checkout-done-id').textContent = result.order.id;
+                        $('#checkout-done-total').textContent = `${result.order.total} €`;
+                        $('.co')?.classList.add('is-complete');
+                        checkoutForm.hidden = true;
+                        $('#checkout-done').hidden = false;
+                        $('#co-step-details')?.classList.replace('is-active', 'is-done');
+                        $('#co-step-details span').textContent = '✓';
+                        $('.co-grid')?.classList.add('is-done');
+                        $('#co-step-done')?.classList.add('is-active');
+                        cart = [];
+                        saveCart();
+                        $('.co-summary')?.classList.add('is-hidden');
+                        history.replaceState(null, '', window.location.pathname);
+                    } else {
+                        checkoutMessage.textContent = result.message || 'Platba zatiaľ nebola dokončená.';
+                        checkoutMessage.className = 'form-message is-error';
+                    }
+                })
+                .catch(() => { checkoutMessage.textContent = 'Platbu sa nepodarilo overiť. Ak ti z účtu odišli peniaze, napíš nám prosím.'; checkoutMessage.className = 'form-message is-error'; });
+        } else if (returned.get('platba') === 'zrusena') {
+            checkoutMessage.textContent = 'Platba bola zrušená, objednávku sme neodoslali. Môžeš to skúsiť znova.';
+            checkoutMessage.className = 'form-message is-error';
+        }
     }
 
     // Slider podobných produktov (detail produktu): šípky posúvajú o jednu kartu, na mobile sa prejde prstom.

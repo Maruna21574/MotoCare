@@ -7,4 +7,8 @@ return [
 
     // Public address of the website, used for links in e-mails (otherwise the Host header of the request is used).
     // 'base_url' => 'https://www.motocarepro.eu',
+
+    // Stripe payments (e-shop and bookings). Keys are in the Stripe dashboard > Developers > API keys;
+    // the webhook secret is shown after adding the endpoint https://<domain>/stripe-webhook.php.
+    // 'stripe' => ['secret_key' => 'sk_live_...', 'webhook_secret' => 'whsec_...'],
 ];

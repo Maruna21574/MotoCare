@@ -18,6 +18,5 @@
             <button class="button button--orange add-product" type="button" data-product-id="<?= e($id) ?>" data-product-name="<?= e($product['name']) ?>" data-product-price="<?= (int) $product['price'] ?>">Do košíka</button>
             <?php endif; ?>
         </div>
-        <a class="shop-card-detail" href="produkt?slug=<?= e($id) ?>">Detail produktu <span aria-hidden="true">→</span></a>
     </div>
 </article>

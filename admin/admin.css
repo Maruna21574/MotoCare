@@ -32,7 +32,7 @@ p { margin: 0; }
 .topbar-nav a { display: flex; align-items: center; gap: 7px; padding: 20px 12px; border-bottom: 3px solid transparent; color: #cfceca; font-size: 14px; font-weight: 700; text-decoration: none; white-space: nowrap; }
 .topbar-nav a:hover { color: #fff; }
 .topbar-nav a.is-active { border-bottom-color: var(--orange); color: #fff; }
-.topbar-nav b { min-width: 20px; padding: 1px 6px; border-radius: 10px; background: var(--orange); color: var(--black); font-size: 12px; text-align: center; }
+.topbar-nav b { min-width: 20px; padding: 1px 6px; border-radius: 10px; background: var(--orange); color: #fff; font-size: 12px; text-align: center; }
 .topbar-actions { display: flex; align-items: center; gap: 16px; font-size: 14px; }
 .topbar-actions a { color: #cfceca; text-decoration: none; }
 .topbar-actions button { padding: 7px 12px; border: 1px solid rgba(255,255,255,.3); border-radius: 6px; background: none; color: #fff; font: inherit; cursor: pointer; }
@@ -54,7 +54,7 @@ p { margin: 0; }
 
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 8px 16px; border: 1px solid #cfcec8; border-radius: 7px; background: #fff; color: var(--ink); font: inherit; font-size: 14px; font-weight: 700; text-decoration: none; white-space: nowrap; cursor: pointer; transition: border-color .15s, background .15s, color .15s; }
 .btn:hover { border-color: var(--ink); }
-.btn--primary { border-color: var(--orange); background: var(--orange); color: var(--black); }
+.btn--primary { border-color: var(--orange); background: var(--orange); color: #fff; }
 .btn--primary:hover { border-color: #d44612; background: #d44612; }
 .btn--danger { border-color: var(--red); background: var(--red); color: #fff; }
 .btn--ghost-danger { border-color: rgba(164,41,35,.35); color: var(--red); }
@@ -67,7 +67,7 @@ p { margin: 0; }
 .badge--shipped { background: #e3ecfb; color: #2552a3; }
 .badge--done { background: #ecebe6; color: #55544f; }
 .badge--cancelled { background: #fbe4e2; color: var(--red); }
-.badge--today { background: var(--orange); color: var(--black); vertical-align: middle; }
+.badge--today { background: var(--orange); color: #fff; vertical-align: middle; }
 
 .flash { margin-bottom: 16px; padding: 13px 16px; border: 1px solid; border-radius: 8px; font-size: 14px; }
 .flash--success { border-color: #bfe3cc; background: #eef8f1; color: #185c35; }
@@ -223,3 +223,27 @@ input:disabled { background: #f1f0ec; color: #aaa9a4; }
     .upload-card { flex-direction: column; align-items: stretch; }
     .text-image { grid-template-columns: 1fr; }
 }
+
+.gallery-tile-bike { display: flex; gap: 6px; padding: 8px 8px 0; margin: 0; }
+.gallery-tile-bike input { flex: 1; min-width: 0; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; font: inherit; font-size: 13px; }
+.gallery-tile > a { cursor: zoom-in; }
+.preview { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; background: rgba(0,0,0,.85); }
+.preview[hidden] { display: none; }
+.preview-box { position: relative; display: grid; place-items: center; width: 100%; height: 100%; padding: 48px 64px; box-sizing: border-box; }
+.preview-box img { max-width: 100%; max-height: calc(100vh - 110px); object-fit: contain; border-radius: 6px; }
+.preview-count { position: absolute; left: 0; right: 0; bottom: 14px; margin: 0; color: #fff; text-align: center; font-size: 14px; }
+.preview-close, .preview-nav { position: absolute; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255,255,255,.15); color: #fff; font-size: 28px; line-height: 1; cursor: pointer; }
+.preview-close { top: 12px; right: 12px; }
+.preview-prev { left: 12px; }
+.preview-next { right: 12px; }
+.preview-close:hover, .preview-nav:hover { background: rgba(255,255,255,.3); }
+@media (max-width: 640px) { .preview-box { padding: 56px 8px 48px; } .preview-nav { top: auto; bottom: 4px; } }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: inherit; font-size: 14px; font-weight: 600; text-decoration: none; }
+.chip small { padding: 1px 7px; border-radius: 10px; background: rgba(0,0,0,.07); font-size: 12px; }
+.chip:hover { border-color: #999; }
+.chip.is-active { border-color: transparent; background: #111; color: #fff; }
+.chip.is-active small { background: rgba(255,255,255,.22); }
+.gallery-admin-title { margin: 24px 0 12px; }
+.gallery-admin-title small { margin-left: 8px; font-weight: 500; font-size: 15px; }

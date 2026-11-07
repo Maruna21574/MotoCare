@@ -31,11 +31,12 @@
             <?php $second = array_filter([!empty($site['company_registry']) ? 'Zapísaná v Obchodnom registri: ' . $site['company_registry'] : '', !empty($site['company_manager']) ? 'Konateľ: ' . $site['company_manager'] : '']); if ($second !== []): ?><p><?= e(implode(' · ', $second)) ?></p><?php endif; ?>
         </div>
         <?php endif; ?>
-        <div class="container site-foot-bottom"><span>© <?= date('Y') ?> <?= e($site['name']) ?></span><nav aria-label="Právne informácie"><a href="gdpr">Ochrana údajov</a><a href="cookies">Cookies</a></nav></div>
+        <div class="container site-foot-bottom"><span>© <?= date('Y') ?> <?= e($site['name']) ?></span><nav aria-label="Právne informácie"><a href="gdpr">Ochrana údajov</a><a href="cookies">Cookies</a><a href="#" data-cookie-settings>Nastavenia cookies</a></nav></div>
     </footer>
     <a class="scroll-to-top" href="#top" aria-label="Späť hore"><span aria-hidden="true">↑</span></a>
     <div class="toast" id="toast" role="status"></div>
     <script>window.MOTOCARE = { today: '<?= date('Y-m-d') ?>', services: <?= json_encode(array_map(static fn (array $service): array => ['name' => $service['name'], 'price' => $service['price'], 'minutes' => $service['minutes']], $services), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>, products: <?= json_encode(array_map(static fn (array $product): array => ['name' => $product['name'], 'price' => $product['price'], 'image' => $product['image'], 'brand' => $product['brand'] ?? '', 'volume' => $product['volume'] ?? 0], $products), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?> };</script>
+    <?php include __DIR__ . '/cookie-banner.php'; ?>
     <script src="script.js?v=<?= (int) filemtime(__DIR__ . '/../script.js') ?>"></script>
 </body>
 </html>
