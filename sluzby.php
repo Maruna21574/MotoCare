@@ -8,10 +8,6 @@ include __DIR__ . '/inc/header.php';
 
 <section class="svc-list section-light">
     <div class="container">
-        <div class="svc-intro">
-            <p class="overline"><?= t('services.intro_overline') ?></p>
-            <p><?= t('services.intro_text') ?></p>
-        </div>
         <?php include __DIR__ . '/inc/services-list.php'; ?>
     </div>
 </section>
@@ -24,13 +20,6 @@ include __DIR__ . '/inc/header.php';
             <li><span><?= sprintf('%02d', $index + 1) ?></span><h3><?= e($title) ?></h3><p><?= e($text) ?></p></li>
             <?php endforeach; ?>
         </ol>
-    </div>
-</section>
-
-<section class="svc-cta section-orange">
-    <div class="container svc-cta-inner">
-        <div><p class="svc-cta-kicker"><?= t('services.cta_kicker') ?></p><h2><?= t('services.cta_title') ?></h2><p><?= t('services.cta_text') ?></p></div>
-        <div class="svc-cta-actions"><a class="button button--dark" href="kontakt">Napísať nám</a><a class="svc-cta-phone" href="<?= e(phoneHref()) ?>"><?= e($site['phone']) ?></a></div>
     </div>
 </section>
 <?php include __DIR__ . '/inc/footer.php'; ?>

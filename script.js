@@ -115,14 +115,61 @@
             if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); }
         });
     });
-    // Workshop videos: a click plays or pauses a clip, only one plays at a time.
+    // Workshop videos open in the same kind of full-screen viewer as the photos (arrows, thumbnails, keyboard).
     const reels = $$('[data-reel]');
-    reels.forEach((reel) => reel.addEventListener('click', () => {
-        const video = $('video', reel);
-        reels.forEach((other) => { if (other !== reel) { $('video', other).pause(); other.classList.remove('is-playing'); } });
-        if (video.paused) { video.preload = 'auto'; video.play().catch(() => {}); reel.classList.add('is-playing'); }
-        else { video.pause(); reel.classList.remove('is-playing'); }
-    }));
+    const videoModal = $('#video-modal');
+    if (reels.length && videoModal) {
+        const player = $('video', videoModal);
+        const caption = $('.lb-caption', videoModal);
+        const counter = $('.lb-counter', videoModal);
+        const thumbs = $$('[data-vm-thumb]', videoModal);
+        let current = 0;
+        let opener = null;
+        const isOpen = () => videoModal.classList.contains('is-open');
+        const show = (index) => {
+            current = (index + reels.length) % reels.length;
+            const reel = reels[current];
+            const source = $('source', reel);
+            player.poster = $('video', reel)?.getAttribute('poster') || '';
+            player.src = source ? source.getAttribute('src').split('#')[0] : '';
+            player.play().catch(() => {});
+            caption.innerHTML = $('.reel-caption', reel)?.innerHTML || '';
+            counter.textContent = `${current + 1} / ${reels.length}`;
+            thumbs.forEach((thumb) => thumb.classList.toggle('is-active', Number(thumb.dataset.vmThumb) === current));
+            $(`[data-vm-thumb="${current}"]`, videoModal)?.scrollIntoView({ block: 'nearest', inline: 'center' });
+        };
+        const open = (index, trigger) => {
+            opener = trigger;
+            show(index);
+            videoModal.classList.add('is-open');
+            videoModal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('vm-open');
+            $('.lb-close', videoModal)?.focus();
+        };
+        const close = () => {
+            player.pause();
+            player.removeAttribute('src');
+            player.load();
+            videoModal.classList.remove('is-open');
+            videoModal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('vm-open');
+            opener?.focus();
+            opener = null;
+        };
+        reels.forEach((reel, index) => reel.addEventListener('click', () => open(index, reel)));
+        videoModal.addEventListener('click', (event) => {
+            if (event.target.closest('[data-vm-close]')) close();
+            else if (event.target.closest('[data-vm-prev]')) show(current - 1);
+            else if (event.target.closest('[data-vm-next]')) show(current + 1);
+            else if (event.target.closest('[data-vm-thumb]')) show(Number(event.target.closest('[data-vm-thumb]').dataset.vmThumb));
+        });
+        document.addEventListener('keydown', (event) => {
+            if (!isOpen()) return;
+            if (event.key === 'Escape') close();
+            else if (event.key === 'ArrowLeft') show(current - 1);
+            else if (event.key === 'ArrowRight') show(current + 1);
+        });
+    }
     // Gallery page shows the first photos; the button reveals the rest in steps.
     const galleryMore = $('[data-gallery-more]');
     galleryMore?.addEventListener('click', () => {

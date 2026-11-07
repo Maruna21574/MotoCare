@@ -247,3 +247,14 @@ input:disabled { background: #f1f0ec; color: #aaa9a4; }
 .chip.is-active small { background: rgba(255,255,255,.22); }
 .gallery-admin-title { margin: 24px 0 12px; }
 .gallery-admin-title small { margin-left: 8px; font-weight: 500; font-size: 15px; }
+
+.video-admin { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.video-card { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
+.video-card-media { position: relative; overflow: hidden; border-radius: 8px; background: #000; }
+.video-card-media video { display: block; width: 100%; aspect-ratio: 9 / 16; max-height: 340px; object-fit: contain; }
+.video-card-form { display: grid; gap: 10px; }
+.video-card-form label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; }
+.video-card-form input[type="text"] { padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; font: inherit; font-weight: 400; }
+.video-card-actions { display: flex; align-items: center; gap: 6px; }
+.video-card-actions form { margin: 0; }
+.video-card-actions form:last-child { margin-left: auto; }

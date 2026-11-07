@@ -49,6 +49,13 @@ $activePage = $activePage ?? '';
             </nav>
             <div class="nav-actions"><a class="cart-button" href="kosik" aria-label="Otvoriť košík" title="Košík"><svg class="cart-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 4.5h2l1.7 10.2a2 2 0 0 0 2 1.7h7.7a2 2 0 0 0 1.9-1.5L20.5 8H6.4"></path><circle cx="9.5" cy="20" r="1.2"></circle><circle cx="17.2" cy="20" r="1.2"></circle></svg><b id="cart-count">0</b></a><a class="button button--small button--orange" href="rezervacia">Rezervovať</a><button class="menu-toggle" id="menu-toggle" type="button" aria-label="Otvoriť menu" aria-controls="mobile-nav" aria-expanded="false"><i></i><i></i></button></div>
         </div>
-        <div class="mobile-nav" id="mobile-nav"><a href="sluzby">Služby</a><a href="o-nas">O nás</a><a href="galeria">Práca</a><a href="shop">E-shop</a><a href="kontakt">Kontakt</a><a href="rezervacia">Rezervácia</a></div>
+        <div class="mobile-nav" id="mobile-nav">
+            <a class="mn-link<?= $activePage === 'sluzby' ? ' is-active' : '' ?>" href="sluzby">Služby</a>
+            <a class="mn-link<?= $activePage === 'onas' ? ' is-active' : '' ?>" href="o-nas">O nás</a>
+            <a class="mn-link<?= $activePage === 'galeria' ? ' is-active' : '' ?>" href="galeria">Práca</a>
+            <a class="mn-link<?= $activePage === 'shop' ? ' is-active' : '' ?>" href="shop">E-shop</a>
+            <a class="mn-link<?= $activePage === 'kontakt' ? ' is-active' : '' ?>" href="kontakt">Kontakt</a>
+            <a class="button button--orange mn-cta" href="rezervacia">Rezervovať termín</a>
+        </div>
     </header>
     <main>

@@ -17,7 +17,7 @@ foreach ($services as $id => $service): $number++; ?>
         <ul class="svc-features"><?php foreach ($service['features'] as $feature): ?><li><?= $checkIcon ?><?= e($feature) ?></li><?php endforeach; ?></ul>
         <div class="svc-footer">
             <div class="svc-price"><small>od</small><strong><?= (int) $service['price'] ?> €</strong><span class="svc-chip"><?= $clockIcon ?><?= e(durationLabel((int) $service['minutes'])) ?></span></div>
-            <div class="svc-actions"><a class="button button--orange" href="rezervacia?service=<?= e($id) ?>">Rezervovať</a><a class="svc-link" href="sluzba?slug=<?= e($id) ?>">Detail služby <span aria-hidden="true">→</span></a></div>
+            <div class="svc-actions"><a class="button button--orange" href="rezervacia?service=<?= e($id) ?>">Rezervovať</a><a class="button button--outline" href="sluzba?slug=<?= e($id) ?>">Detail služby</a></div>
         </div>
     </div>
 </article>

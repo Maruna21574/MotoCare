@@ -15,7 +15,6 @@ $icons = [
 $steps = tl('about.steps');
 ?>
 <?php $hero = ['title' => t('about.hero_title'), 'text' => textRaw('about.hero_text'), 'crumbs' => [['O nás', null]], 'video' => '4922677']; include __DIR__ . '/inc/page-hero.php'; ?>
-<div class="ticker" aria-hidden="true"><div class="ticker-track"><?php for ($copy = 0; $copy < 2; $copy++): ?><div class="ticker-group"<?= $copy === 1 ? ' aria-hidden="true"' : '' ?>><?php foreach (tl('about.ticker') as $word): ?><span><?= e(mb_strtoupper($word)) ?></span><?= $tickerIcon ?><?php endforeach; ?></div><?php endfor; ?></div></div>
 
 <section class="about-intro section-light">
     <div class="container about-intro-grid">
@@ -59,8 +58,8 @@ $steps = tl('about.steps');
     </div>
 </section>
 
-<section class="about-strip section-dark">
-    <div class="about-strip-grid"><?php for ($i = 1; $i <= 4; $i++): ?><a href="galeria"><img loading="lazy" src="<?= t('about.strip_image_' . $i) ?>" alt="Ukážka z galérie MotoCare Pro"></a><?php endfor; ?></div>
+<section class="about-strip home-result section-dark">
+    <?php include __DIR__ . '/inc/gallery-slider.php'; ?>
     <div class="container about-strip-cta"><p><?= t('about.strip_text') ?></p><a class="button button--orange" href="galeria">Otvoriť galériu</a></div>
 </section>
 
@@ -68,7 +67,7 @@ $steps = tl('about.steps');
     <div class="container">
         <div class="about-contact-card">
             <div><p class="overline"><?= t('about.contact_overline') ?></p><h2><?= t('about.contact_title') ?></h2><p><?= t('about.contact_text') ?></p></div>
-            <div class="about-contact-actions"><a class="button button--orange" href="kontakt">Napísať správu</a><a class="about-contact-phone" href="<?= e(phoneHref()) ?>"><?= e($site['phone']) ?></a></div>
+            <div class="about-contact-actions"><a class="button button--orange" href="kontakt">Napísať správu</a><a class="button button--outline" href="<?= e(phoneHref()) ?>"><?= e($site['phone']) ?></a></div>
         </div>
     </div>
 </section>

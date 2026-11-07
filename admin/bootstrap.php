@@ -141,6 +141,7 @@ function renderHeader(string $title, string $active = ''): void
         'frames' => ['Rámy', 0],
         'services' => ['Služby', 0],
         'gallery' => ['Galéria', 0],
+        'videos' => ['Videá', 0],
         'texts' => ['Texty', 0],
         'emails' => ['E-maily', 0],
         'settings' => ['Nastavenia', 0],

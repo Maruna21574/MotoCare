@@ -51,30 +51,37 @@ $shown = isset($bikes[$bike]) ? array_values(array_filter($gallery, static fn (a
 </section>
 
 <?php
-$reels = [
-    ['Honda Varadero', 'Umývanie aktívnou penou'],
-    ['Honda Varadero', 'Ručné umývanie detailov'],
-    ['KTM 1290 Super Adventure', 'Hotová motorka v štúdiu'],
-    ['KTM 1290 Super Adventure', 'Ošetrenie laku nádrže'],
-    ['Honda Transalp', 'Predumytie penou'],
-    ['Honda Transalp', 'Výsledok v štúdiu'],
-    ['Suzuki Bandit', 'Nádrž a lak'],
-    ['Suzuki Bandit', 'Leštenie nádrže'],
-];
+$reels = $videos; // managed in the admin (Videá)
+$videoPoster = static fn (array $video): string => (string) ($video['poster'] ?? '');
+$videoFrame = static fn (array $video): string => $video['src'] . ($videoPoster($video) === '' ? '#t=0.1' : '');
 ?>
+<?php if ($reels !== []): ?>
 <section class="reels section-light section-pad">
     <div class="container">
         <div class="section-heading reveal"><div><p class="overline"><?= t('gallery.reels_eyebrow') ?></p><h2><?= t('gallery.reels_title') ?></h2></div><p class="section-heading-note"><?= t('gallery.reels_note') ?></p></div>
         <div class="reels-row">
-            <?php foreach ($reels as $index => [$bikeName, $caption]): $file = sprintf('vid/dielna/dielna-%02d', $index + 1); ?>
-            <button class="reel" type="button" data-reel aria-label="Prehrať video: <?= e($bikeName . ' — ' . $caption) ?>">
-                <video muted loop playsinline preload="none" poster="<?= e($file) ?>.webp"><source src="<?= e($file) ?>.mp4" type="video/mp4"></video>
+            <?php foreach ($reels as $index => $reel): $bikeName = (string) ($reel['bike'] ?? ''); $caption = (string) ($reel['caption'] ?? ''); ?>
+            <button class="reel" type="button" data-reel aria-label="Prehrať video: <?= e(trim($bikeName . ' — ' . $caption, ' —')) ?>">
+                <video muted loop playsinline preload="<?= $videoPoster($reel) === '' ? 'metadata' : 'none' ?>"<?= $videoPoster($reel) !== '' ? ' poster="' . e($videoPoster($reel)) . '"' : '' ?>><source src="<?= e($videoFrame($reel)) ?>"<?= str_ends_with($reel['src'], '.webm') ? ' type="video/webm"' : ' type="video/mp4"' ?>></video>
                 <span class="reel-play" aria-hidden="true"></span>
-                <span class="reel-caption"><small><?= e($bikeName) ?></small><?= e($caption) ?></span>
+                <span class="reel-caption"><?php if ($bikeName !== ''): ?><small><?= e($bikeName) ?></small><?php endif; ?><?= e($caption) ?></span>
             </button>
             <?php endforeach; ?>
         </div>
     </div>
 </section>
 
+<div class="gallery-lightbox video-lightbox" id="video-modal" aria-hidden="true">
+    <div class="lb-backdrop" data-vm-close></div>
+    <div class="lb-dialog" role="dialog" aria-modal="true" aria-label="Videá zo štúdia">
+        <div class="lb-top"><span class="lb-counter"></span><span class="lb-caption"></span><button class="lb-close" type="button" data-vm-close aria-label="Zavrieť video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button></div>
+        <div class="lb-stage">
+            <button class="lb-nav lb-nav--prev" type="button" data-vm-prev aria-label="Predchádzajúce video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"></path></svg></button>
+            <video controls playsinline loop preload="none"></video>
+            <button class="lb-nav lb-nav--next" type="button" data-vm-next aria-label="Ďalšie video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg></button>
+        </div>
+        <div class="lb-thumbs" aria-label="Náhľady videí"><?php foreach ($reels as $index => $reel): ?><button type="button" data-vm-thumb="<?= $index ?>" aria-label="Prehrať video <?= $index + 1 ?>"><?php if ($videoPoster($reel) !== ''): ?><img loading="lazy" src="<?= e($videoPoster($reel)) ?>" alt=""><?php else: ?><video muted preload="metadata" playsinline src="<?= e($videoFrame($reel)) ?>"></video><?php endif; ?></button><?php endforeach; ?></div>
+    </div>
+</div>
+<?php endif; ?>
 <?php include __DIR__ . '/inc/footer.php'; ?>

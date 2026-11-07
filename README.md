@@ -9,7 +9,7 @@ Podstránky: `sluzby.php`, `sluzba.php`, `galeria.php`, `o-nas.php`, `kontakt.ph
 1. Nahraj celý obsah priečinka na hosting do webrootu.
 2. Nastav PHP 7.4+ (odporúčané PHP 8.x).
 3. Priečinok `data/` musí mať právo zápisu pre PHP. Súbor `data/.htaccess` ho chráni pred priamym zobrazením (funguje na Apache, čo Websupport používa).
-4. Vytvor schránku `info@motocarepro.eu` — z nej odchádzajú e-maily zákazníkom (PHP `mail()`).
+4. E-maily odchádzajú cez SMTP zo schránky `web@motocarepro.sk` (nastavenie `smtp` v `inc/local.php`, vzor v `inc/local.example.php`); upozornenia pre majiteľa chodia na `info@motocarepro.sk`, odpovede zákazníkov tiež.
 5. Nastav heslo administrácie (pozri nižšie).
 
 ## Čisté adresy

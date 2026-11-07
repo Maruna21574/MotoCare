@@ -1023,7 +1023,7 @@ body:not(.home-page) .product-detail-hero { border-bottom: 3px solid var(--orang
 }
 
 /* Footer v2: readable type scale, four clear columns. */
-.site-foot { position: relative; background: #0a0a0a; color: var(--white); border-top: 3px solid var(--orange); }
+.site-foot { position: relative; background: #0a0a0a; color: var(--white); }
 .site-foot-cta { display: flex; align-items: center; justify-content: space-between; gap: 30px; padding-top: 64px; padding-bottom: 56px; border-bottom: 1px solid rgba(255,255,255,.1); }
 .site-foot-cta h2 { font-size: clamp(38px, 4.6vw, 64px); line-height: .95; }
 .site-foot-cta-actions { display: flex; flex: 0 0 auto; gap: 12px; }
@@ -1918,7 +1918,7 @@ body.page-plain .site-header:not(.is-scrolled) { margin-bottom: 0; background: r
 .site-foot-legal + .site-foot-bottom { padding-top: 18px; }
 
 /* Home page: photo strip, calmer and in line with the gallery */
-.home-result .home-gallery-slider { margin-top: 56px; -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); }
+.home-result .home-gallery-slider { margin-top: 56px; }
 .home-result .home-gallery-track { animation-duration: calc(var(--slides, 8) * 5s); }
 .home-result .home-gallery-group { gap: 18px; padding-right: 18px; }
 .home-result .home-gallery-slide { width: clamp(230px, 21vw, 330px); height: auto; aspect-ratio: 4 / 5; border-radius: 2px; background: #e4e3df; }
@@ -2199,3 +2199,80 @@ body.cookie-dialog-open { overflow: hidden; }
 .pay-choice input { margin-top: 4px; accent-color: var(--orange); flex: 0 0 auto; }
 .pay-choice span { display: grid; gap: 3px; }
 .pay-choice small { color: var(--ink-muted); font-size: 13px; line-height: 1.5; }
+
+/* Mobile menu */
+.mobile-nav.is-open { max-height: 640px; padding: 4px 20px 22px; background: var(--black); }
+.mobile-nav a.mn-link { display: block; padding: 17px 0; border-bottom: 1px solid var(--line-dark); color: #fff; font-size: 24px; letter-spacing: .02em; }
+.mobile-nav a.mn-link.is-active { color: var(--orange); }
+.mobile-nav a.mn-cta { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 54px; margin: 22px 0 6px; border-radius: 999px; padding: 0 24px; border: 0; color: #fff; font-family: var(--body); font-size: 15px; text-transform: uppercase; }
+.mobile-nav .mn-contact { display: flex; flex-wrap: wrap; gap: 6px 22px; }
+.mobile-nav .mn-contact a { padding: 0; border: 0; color: #c3c2bd; font-family: var(--body); font-size: 14px; text-transform: none; }
+
+/* Outlined button (e.g. "Detail služby") */
+.button--outline { border-color: var(--black); background: transparent; color: var(--black); box-shadow: none; }
+.button--outline:hover { background: var(--black); color: #fff; box-shadow: none; }
+.svc-list--dark .button--outline { border-color: rgba(255,255,255,.6); color: #fff; }
+.svc-list--dark .button--outline:hover { border-color: var(--orange); background: var(--orange); color: #fff; }
+
+/* Underlined links turned into outlined buttons ("Pozrieť galériu", "Pozrieť produkty", "Všetky služby", ...) */
+.underlined-link, .svc-link { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; margin-top: 0; padding: 14px 28px; border: 1px solid var(--black); border-radius: var(--radius); background: transparent; color: var(--black); font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; transition: background .2s, border-color .2s, color .2s; }
+.underlined-link:hover, .svc-link:hover, .home-intro-copy .underlined-link:hover { border-color: var(--black); background: var(--black); color: #fff; }
+.underlined-link--light, .svc-list--dark .svc-link { border-color: rgba(255,255,255,.6); color: #fff; }
+.underlined-link--light:hover, .svc-list--dark .svc-link:hover { border-color: var(--orange); background: var(--orange); color: #fff; }
+@media (max-width: 760px) {
+    .section-heading > .underlined-link { width: 100%; margin-top: 18px; }
+}
+
+/* Homepage: "show more" buttons sit in the heading on desktop and below the content on mobile */
+.home-more-bottom { display: none; }
+@media (max-width: 760px) {
+    .home-more-top { display: none; }
+    .home-more-bottom { display: block; margin-top: 28px; }
+    .home-more-bottom .underlined-link { width: 100%; }
+}
+
+/* Služby: space above the process section; phone number as a button in the orange call-to-action */
+.svc-process { padding: 100px 0; }
+.svc-cta-actions .button { min-width: 220px; }
+@media (max-width: 760px) { .svc-process { padding: 72px 0 70px; } }
+
+/* O nás: the photo strip is the same moving slider as on the homepage */
+.about-strip.home-result { padding: 0 0 70px; }
+.about-strip.home-result .home-gallery-slider { margin-top: 0; }
+.about-strip.home-result .home-gallery-slide { background: #1a1a1a; }
+
+/* O nás: process steps as a row of four cards with a numbered photo on top */
+.about-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; counter-reset: step; }
+.about-step, .about-step--flip { display: flex; flex-direction: column; counter-increment: step; border-radius: 14px; box-shadow: 0 12px 34px rgba(6,6,6,.07); }
+.about-step--flip .about-step-media { order: 0; }
+.about-step-media, .about-step--flip .about-step-media { min-height: 0; aspect-ratio: 4 / 3; }
+.about-step-media::after { position: absolute; top: 14px; left: 14px; display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; background: var(--orange); color: #fff; font-family: var(--display); font-size: 20px; font-weight: 700; content: counter(step, decimal-leading-zero); }
+.about-step-copy { flex: 1; justify-content: flex-start; padding: 24px 24px 28px; }
+.about-step-copy h3 { margin: 0 0 12px; padding-top: 0; font-size: clamp(26px, 2.2vw, 32px); line-height: 1; }
+.about-step-copy h3::before { display: none; }
+.about-step-copy p { max-width: none; font-size: 15px; line-height: 1.65; }
+@media (max-width: 1100px) { .about-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .about-steps { grid-template-columns: 1fr; gap: 16px; } .about-step-copy { padding: 22px 20px 24px; } }
+
+/* O nás steps: two larger cards per row */
+.about-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+.about-step-media, .about-step--flip .about-step-media { aspect-ratio: 16 / 10; }
+.about-step-copy { padding: 32px 34px 36px; }
+.about-step-copy h3 { font-size: clamp(30px, 3vw, 42px); }
+.about-step-copy p { font-size: 16px; line-height: 1.7; }
+.about-step-media::after { top: 18px; left: 18px; width: 48px; height: 48px; font-size: 22px; }
+@media (max-width: 760px) { .about-steps { grid-template-columns: 1fr; gap: 18px; } .about-step-copy { padding: 24px 22px 28px; } }
+
+/* Video player: same look as the photo lightbox */
+body.vm-open { overflow: hidden; }
+.video-lightbox .lb-stage video { display: block; max-width: 100%; max-height: 100%; border-radius: 4px; background: #000; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+.video-lightbox .lb-top { gap: 16px; }
+.lb-caption { flex: 1; min-width: 0; color: var(--white); font-size: 15px; font-weight: 600; text-align: center; }
+.lb-caption small { margin-right: 10px; color: var(--orange); font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.video-lightbox .lb-thumbs button { position: relative; flex-basis: 48px; width: 48px; height: 84px; }
+@media (max-width: 640px) { .lb-caption small { display: block; margin: 0 0 2px; } .video-lightbox .lb-thumbs button { flex-basis: 40px; width: 40px; height: 70px; } }
+
+/* Gallery filter: chips wrap onto more lines instead of scrolling sideways (desktop and mobile) */
+.gallery-filter { flex-wrap: wrap; gap: 10px; margin-right: 0; padding-right: 0; overflow: visible; }
+@media (max-width: 640px) { .gallery-filter { gap: 8px; } .gallery-filter a { padding: 9px 14px; } }
+.video-lightbox .lb-thumbs video { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }

@@ -59,11 +59,4 @@ $shopTab = 'frames';
     </div>
 </section>
 <?php endif; ?>
-
-<section class="svc-cta section-orange">
-    <div class="container svc-cta-inner">
-        <div><p class="svc-cta-kicker"><?= t('frames.cta_kicker') ?></p><h2><?= t('frames.cta_title') ?></h2><p><?= t('frames.cta_text') ?></p></div>
-        <div class="svc-cta-actions"><a class="button button--dark" href="kontakt">Napísať nám</a><a class="svc-cta-phone" href="<?= e(phoneHref()) ?>"><?= e($site['phone']) ?></a></div>
-    </div>
-</section>
 <?php include __DIR__ . '/inc/footer.php'; ?>

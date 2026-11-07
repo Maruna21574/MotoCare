@@ -349,6 +349,71 @@ if (in_array($action, ['gallery_delete','gallery_move', 'gallery_slider', 'galle
     redirect('p=gallery' . $gf . '#foto-' . $index);
 }
 
+if ($action === 'video_upload') {
+    $bike = post('bike', 60);
+    $caption = post('caption', 120);
+    $files = uploadedFiles('video');
+    if ($files === []) { flash('Vyber video na nahratie.', 'error'); redirect('p=videos'); }
+    try {
+        $src = storeUploadedVideo($files[0], $bike !== '' ? $bike : 'video');
+        $poster = '';
+        $posterFile = uploadedFiles('poster')[0] ?? null;
+        if ($posterFile !== null) {
+            try {
+                $posterOriginal = storeUploadedImage($posterFile, 'video-poster');
+                $poster = makeGalleryThumb($posterOriginal, 720) ?? $posterOriginal;
+                if ($poster !== $posterOriginal) deleteUploadIfUnused($posterOriginal); // keep only the small version
+            } catch (RuntimeException $exception) {
+                flash('Titulná fotka sa nenahrala: ' . $exception->getMessage(), 'error');
+            }
+        }
+        $videos[] = ['src' => $src, 'bike' => $bike, 'caption' => $caption] + ($poster !== '' ? ['poster' => $poster] : []);
+        saveOrFail($videosFile, array_values($videos), 'p=videos');
+        flash('Video je pridané.');
+    } catch (RuntimeException $exception) {
+        flash($exception->getMessage(), 'error');
+    }
+    redirect('p=videos');
+}
+
+if (in_array($action, ['video_save', 'video_move', 'video_delete'], true)) {
+    $index = (int) post('id', 10);
+    if (!isset($videos[$index]) || $videos[$index]['src'] !== post('src', 500)) { flash('Zoznam videí sa medzitým zmenil, skús to znova.', 'error'); redirect('p=videos'); }
+    if ($action === 'video_delete') {
+        $removed = $videos[$index];
+        array_splice($videos, $index, 1);
+        saveOrFail($videosFile, array_values($videos), 'p=videos');
+        deleteUploadedVideo((string) $removed['src']);
+        deleteUploadIfUnused((string) ($removed['poster'] ?? ''));
+        flash('Video je odstránené.');
+    } elseif ($action === 'video_move') {
+        $target = post('direction', 4) === 'up' ? $index - 1 : $index + 1;
+        if (isset($videos[$target])) [$videos[$index], $videos[$target]] = [$videos[$target], $videos[$index]];
+        saveOrFail($videosFile, array_values($videos), 'p=videos');
+    } else {
+        $videos[$index]['bike'] = post('bike', 60);
+        $videos[$index]['caption'] = post('caption', 120);
+        $posterFile = uploadedFiles('poster')[0] ?? null;
+        if ($posterFile !== null) {
+            try {
+                $posterOriginal = storeUploadedImage($posterFile, 'video-poster');
+                $oldPoster = (string) ($videos[$index]['poster'] ?? '');
+                $videos[$index]['poster'] = makeGalleryThumb($posterOriginal, 720) ?? $posterOriginal;
+                if ($videos[$index]['poster'] !== $posterOriginal) deleteUploadIfUnused($posterOriginal);
+                saveOrFail($videosFile, array_values($videos), 'p=videos');
+                deleteUploadIfUnused($oldPoster);
+            } catch (RuntimeException $exception) {
+                flash('Titulná fotka sa nenahrala: ' . $exception->getMessage(), 'error');
+                redirect('p=videos#video-' . $index);
+            }
+        } else {
+            saveOrFail($videosFile, array_values($videos), 'p=videos');
+        }
+        flash('Video je uložené.');
+    }
+    redirect('p=videos#video-' . $index);
+}
+
 if ($action === 'texts_save') {
     $pageKey = post('page', 30);
     $definition = textRegistry()[$pageKey] ?? null;
@@ -699,6 +764,43 @@ if ($page === 'gallery') {
                 </span>
             </figcaption>
         </figure>
+        <?php endforeach; ?>
+    </div>
+    <?php
+    renderFooter();
+    exit;
+}
+
+if ($page === 'videos') {
+    renderHeader('Videá', 'videos');
+    $last = count($videos) - 1;
+    ?>
+    <div class="page-head"><div><h1>Videá zo štúdia</h1><p class="muted">Videá v sekcii „Zo štúdia“ na stránke Galéria. Nahraj MP4 alebo WebM, doplň motorku a popis. Poradie zmeníš šípkami.</p></div></div>
+    <form class="card upload-card" method="post" enctype="multipart/form-data">
+        <?= csrfField() ?><input type="hidden" name="action" value="video_upload">
+        <label>Motorka <small>nepovinné</small><input type="text" name="bike" maxlength="60" list="video-bikes" placeholder="napr. KTM 1290 Super Adventure"><datalist id="video-bikes"><?php foreach (array_unique(array_filter(array_column($videos, 'bike'))) as $name): ?><option value="<?= e($name) ?>"><?php endforeach; ?></datalist></label>
+        <label>Popis videa <small>nepovinné</small><input type="text" name="caption" maxlength="120" placeholder="napr. Leštenie nádrže"></label>
+        <label>Video <small>MP4 alebo WebM, najviac 200 MB (limit môže byť nižší podľa hostingu)</small><input type="file" name="video" accept="video/mp4,video/webm" required></label>
+        <label>Titulná fotka <small>nepovinné · ak ju nenahráš, použije sa prvý záber videa</small><input type="file" name="poster" accept="image/jpeg,image/png,image/webp"></label>
+        <button class="btn btn--primary" type="submit">Pridať video</button>
+    </form>
+    <?php if ($videos === []): ?><div class="card"><p class="muted">Zatiaľ tu nie sú žiadne videá.</p></div><?php endif; ?>
+    <div class="video-admin">
+        <?php foreach ($videos as $index => $video): $fields = csrfField() . '<input type="hidden" name="id" value="' . $index . '"><input type="hidden" name="src" value="' . e($video['src']) . '">'; ?>
+        <article class="card video-card" id="video-<?= $index ?>">
+            <div class="video-card-media"><video controls preload="metadata" playsinline<?= !empty($video['poster']) ? ' poster="' . e(imageSrc($video['poster'])) . '"' : '' ?> src="<?= e(imageSrc($video['src'])) ?><?= empty($video['poster']) ? '#t=0.1' : '' ?>"></video><span class="gallery-tile-num"><?= $index + 1 ?></span></div>
+            <form method="post" enctype="multipart/form-data" class="video-card-form"><?= $fields ?><input type="hidden" name="action" value="video_save">
+                <label>Motorka<input type="text" name="bike" maxlength="60" value="<?= e((string) ($video['bike'] ?? '')) ?>"></label>
+                <label>Popis<input type="text" name="caption" maxlength="120" value="<?= e((string) ($video['caption'] ?? '')) ?>"></label>
+                <label>Zmeniť titulnú fotku <small>nepovinné</small><input type="file" name="poster" accept="image/jpeg,image/png,image/webp"></label>
+                <button class="btn btn--small btn--primary" type="submit">Uložiť</button>
+            </form>
+            <div class="video-card-actions">
+                <form method="post"><?= $fields ?><input type="hidden" name="action" value="video_move"><input type="hidden" name="direction" value="up"><button class="btn btn--small btn--icon" type="submit" title="Posunúť dopredu" <?= $index === 0 ? 'disabled' : '' ?>>←</button></form>
+                <form method="post"><?= $fields ?><input type="hidden" name="action" value="video_move"><input type="hidden" name="direction" value="down"><button class="btn btn--small btn--icon" type="submit" title="Posunúť dozadu" <?= $index === $last ? 'disabled' : '' ?>>→</button></form>
+                <form method="post" data-confirm="Odstrániť toto video?"><?= $fields ?><input type="hidden" name="action" value="video_delete"><button class="btn btn--small btn--ghost-danger" type="submit">Odstrániť</button></form>
+            </div>
+        </article>
         <?php endforeach; ?>
     </div>
     <?php

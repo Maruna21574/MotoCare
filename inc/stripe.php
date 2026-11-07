@@ -34,7 +34,6 @@ function stripeRequest(string $method, string $path, array $params = []): array
     curl_setopt_array($curl, $options);
     $body = curl_exec($curl);
     $status = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
-    curl_close($curl);
     $data = is_string($body) ? json_decode($body, true) : null;
     if (!is_array($data) || $status >= 400) {
         error_log('Stripe error ' . $status . ': ' . (is_string($body) ? substr($body, 0, 500) : 'no response'));

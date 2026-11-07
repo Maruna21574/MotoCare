@@ -25,13 +25,7 @@
                 <?php foreach (openingHoursGroups() as $group): ?><p class="site-foot-hours"><span><?= e($group['label']) ?></span><b><?= e($group['value']) ?></b></p><?php endforeach; ?>
             </div>
         </div>
-        <?php if (companyDetails() !== []): ?>
-        <div class="container site-foot-legal">
-            <p><?php foreach (array_values(array_filter([$site['company_name'] ?? '', $site['company_seat'] ?? '', !empty($site['company_ico']) ? 'IČO: ' . $site['company_ico'] : '', !empty($site['company_dic']) ? 'DIČ: ' . $site['company_dic'] : '', $site['company_vat'] ?? ''])) as $i => $part): ?><?= $i === 0 ? '<strong>' . e($part) . '</strong>' : ' · ' . e($part) ?><?php endforeach; ?></p>
-            <?php $second = array_filter([!empty($site['company_registry']) ? 'Zapísaná v Obchodnom registri: ' . $site['company_registry'] : '', !empty($site['company_manager']) ? 'Konateľ: ' . $site['company_manager'] : '']); if ($second !== []): ?><p><?= e(implode(' · ', $second)) ?></p><?php endif; ?>
-        </div>
-        <?php endif; ?>
-        <div class="container site-foot-bottom"><span>© <?= date('Y') ?> <?= e($site['name']) ?></span><nav aria-label="Právne informácie"><a href="gdpr">Ochrana údajov</a><a href="cookies">Cookies</a><a href="#" data-cookie-settings>Nastavenia cookies</a></nav></div>
+        <div class="container site-foot-bottom"><span>© <?= date('Y') ?> <?= e($site['name']) ?></span><nav aria-label="Právne informácie"><a href="gdpr">Ochrana údajov</a><a href="cookies">Cookies</a></nav></div>
     </footer>
     <a class="scroll-to-top" href="#top" aria-label="Späť hore"><span aria-hidden="true">↑</span></a>
     <div class="toast" id="toast" role="status"></div>

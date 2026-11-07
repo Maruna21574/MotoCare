@@ -78,19 +78,33 @@ function sendMail(string $to, array $message, ?string $replyTo = null): bool
 {
     global $site, $mailLogFile;
     if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return false;
-    $from = $site['email'];
+    $smtp = smtpConfigured();
+    $replyDefault = $site['email'];
+    $from = $smtp ? (smtpConfig()['from'] ?: smtpConfig()['user']) : $site['email']; // with SMTP the mail goes out from the web mailbox, replies go to info@
     $boundary = 'mc_' . bin2hex(random_bytes(12));
     $headers = [
         'From' => mb_encode_mimeheader($site['name'], 'UTF-8', 'B') . ' <' . $from . '>',
-        'Reply-To' => $replyTo && filter_var($replyTo, FILTER_VALIDATE_EMAIL) ? $replyTo : $from,
+        'Reply-To' => $replyTo && filter_var($replyTo, FILTER_VALIDATE_EMAIL) ? $replyTo : $replyDefault,
         'MIME-Version' => '1.0',
         'Content-Type' => 'multipart/alternative; boundary="' . $boundary . '"',
     ];
     $body = "--{$boundary}\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($message['text']))
         . "--{$boundary}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($message['html']))
         . "--{$boundary}--\r\n";
-    $sent = @mail($to, mb_encode_mimeheader($message['subject'], 'UTF-8', 'B'), $body, $headers, '-f' . $from);
-    @file_put_contents($mailLogFile, sprintf("%s\t%s\t%s\t%s\n", date('c'), $sent ? 'OK' : 'FAIL', $to, $message['subject']), FILE_APPEND | LOCK_EX);
+    $encodedSubject = mb_encode_mimeheader($message['subject'], 'UTF-8', 'B');
+    $error = '';
+    if ($smtp) {
+        try {
+            smtpSend($to, $encodedSubject, $body, $headers);
+            $sent = true;
+        } catch (RuntimeException $exception) {
+            $sent = false;
+            $error = $exception->getMessage();
+        }
+    } else {
+        $sent = @mail($to, $encodedSubject, $body, $headers, '-f' . $from);
+    }
+    @file_put_contents($mailLogFile, sprintf("%s\t%s\t%s\t%s%s\n", date('c'), $sent ? 'OK' : 'FAIL', $to, $message['subject'], $error !== '' ? "\t" . $error : ''), FILE_APPEND | LOCK_EX);
     return $sent;
 }
 

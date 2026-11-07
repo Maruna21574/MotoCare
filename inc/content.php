@@ -47,6 +47,24 @@ if (is_file($framesFile)) {
 }
 $frames = array_filter($allFrames, static fn (array $category): bool => empty($category['hidden']));
 
+// Workshop videos shown on the gallery page: [['src', 'poster'?, 'bike', 'caption'], ...].
+// Until the admin saves them, the eight clips shipped in vid/dielna/ are used.
+$videosFile = $dataDir . DIRECTORY_SEPARATOR . 'videos.json';
+if (is_file($videosFile)) {
+    $videos = readJsonFile($videosFile);
+} else {
+    $videos = [];
+    foreach ([
+        ['Honda Varadero', 'Umývanie aktívnou penou'], ['Honda Varadero', 'Ručné umývanie detailov'],
+        ['KTM 1290 Super Adventure', 'Hotová motorka v štúdiu'], ['KTM 1290 Super Adventure', 'Ošetrenie laku nádrže'],
+        ['Honda Transalp', 'Predumytie penou'], ['Honda Transalp', 'Výsledok v štúdiu'],
+        ['Suzuki Bandit', 'Nádrž a lak'], ['Suzuki Bandit', 'Leštenie nádrže'],
+    ] as $index => [$bike, $caption]) {
+        $base = sprintf('vid/dielna/dielna-%02d', $index + 1);
+        $videos[] = ['src' => $base . '.mp4', 'poster' => $base . '.webp', 'bike' => $bike, 'caption' => $caption];
+    }
+}
+
 if (is_file($galleryFile)) {
     $gallery = readJsonFile($galleryFile);
 } else {
@@ -238,6 +256,36 @@ function storeUploadedImage(array $file, string $prefix): string
     return 'uploads/' . $name;
 }
 
+/**
+ * Saves an uploaded video (MP4 or WebM) to uploads/videos/ and returns its web path.
+ * Throws RuntimeException with a message for the admin when the file is not usable.
+ */
+function storeUploadedVideo(array $file, string $prefix): string
+{
+    global $uploadsDir;
+    $types = ['video/mp4' => 'mp4', 'video/webm' => 'webm'];
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !is_uploaded_file($file['tmp_name'])) {
+        throw new RuntimeException(in_array($file['error'] ?? 0, [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true) ? 'Video je väčšie, než povoľuje server (upload_max_filesize / post_max_size).' : 'Video sa nepodarilo nahrať.');
+    }
+    if ($file['size'] > 200 * 1024 * 1024) throw new RuntimeException('Video môže mať najviac 200 MB.');
+    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
+    if (!isset($types[$mime])) throw new RuntimeException('Nahrať môžeš iba video vo formáte MP4 alebo WebM (iPhone .mov najprv prekonvertuj na MP4).');
+    $dir = $uploadsDir . DIRECTORY_SEPARATOR . 'videos';
+    if (!is_dir($dir) && !mkdir($dir, 0775, true) && !is_dir($dir)) throw new RuntimeException('Priečinok na videá sa nepodarilo vytvoriť.');
+    $name = slugify($prefix) . '-' . bin2hex(random_bytes(4)) . '.' . $types[$mime];
+    if (!move_uploaded_file($file['tmp_name'], $dir . DIRECTORY_SEPARATOR . $name)) throw new RuntimeException('Video sa nepodarilo uložiť.');
+    return 'uploads/videos/' . $name;
+}
+
+/** Deletes an uploaded video file (files shipped with the site in vid/ are never deleted). */
+function deleteUploadedVideo(string $path): void
+{
+    global $uploadsDir, $videosFile;
+    if (!preg_match('#^uploads/videos/[a-z0-9-]+\.(mp4|webm)$#', $path)) return;
+    if (is_file($videosFile) && str_contains((string) file_get_contents($videosFile), $path)) return;
+    @unlink($uploadsDir . DIRECTORY_SEPARATOR . 'videos' . DIRECTORY_SEPARATOR . basename($path));
+}
+
 /** $_FILES entry with multiple files as a list of single-file arrays. */
 function uploadedFiles(string $field): array
 {
@@ -255,9 +303,9 @@ function uploadedFiles(string $field): array
 /** Deletes a file from uploads/ when nothing references it any more (images shipped with the site are never deleted). */
 function deleteUploadIfUnused(string $path): void
 {
-    global $uploadsDir, $productsFile, $servicesFile, $galleryFile, $textsFile, $framesFile;
+    global $uploadsDir, $productsFile, $servicesFile, $galleryFile, $textsFile, $framesFile, $videosFile;
     if (!preg_match('#^uploads/[a-z0-9-]+\.(jpg|png|webp|gif)$#', $path)) return;
-    foreach ([$productsFile, $servicesFile, $galleryFile, $textsFile, $framesFile] as $file) {
+    foreach ([$productsFile, $servicesFile, $galleryFile, $textsFile, $framesFile, $videosFile] as $file) {
         if (is_file($file) && str_contains((string) file_get_contents($file), $path)) return;
     }
     @unlink($uploadsDir . DIRECTORY_SEPARATOR . basename($path));

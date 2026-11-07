@@ -5,7 +5,7 @@ date_default_timezone_set('Europe/Bratislava');
 
 $site = [
     'name' => 'MotoCare Pro',
-    'email' => 'info@motocarepro.eu',
+    'email' => 'info@motocarepro.sk',
     'phone' => '+421 907 622 954',
     'facebook' => 'https://www.facebook.com/profile.php?id=61586104985065&locale=sk_SK',
     'instagram' => 'https://www.instagram.com/motocare_pro/',
@@ -254,6 +254,7 @@ function productUnitPrice(array $product): string
 require_once __DIR__ . '/booking.php';
 require_once __DIR__ . '/mail.php';
 require_once __DIR__ . '/stripe.php';
+require_once __DIR__ . '/smtp.php';
 require_once __DIR__ . '/content.php';
 require_once __DIR__ . '/spam.php';
 require_once __DIR__ . '/seo.php';
