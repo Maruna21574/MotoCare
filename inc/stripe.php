@@ -17,7 +17,8 @@ function stripeConfig(): array
 
 function stripeConfigured(): bool
 {
-    return str_starts_with(stripeConfig()['secret_key'], 'sk_');
+    $key = stripeConfig()['secret_key'];
+    return str_starts_with($key, 'sk_') || str_starts_with($key, 'rk_'); // rk_ = restricted key
 }
 
 /** True when the payment form is shown inside our own page (needs the publishable key); otherwise the hosted payment page is used. */
