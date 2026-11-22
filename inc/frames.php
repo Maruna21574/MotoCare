@@ -23,6 +23,19 @@ return [
     'centralne-stojany' => [
         'title' => 'Centrálne stojany',
         'text' => 'Centrálny stojan na jednoduchú údržbu, mazanie reťaze alebo zimné uloženie motorky.',
+        // Produktová časť stránky (nadpis, výhody, kompatibilita). Upraviteľná v administrácii pri kategórii.
+        'detail' => [
+            'heading' => 'Centrálny stojan',
+            'name' => 'Honda XL 1000 Varadero',
+            'brand' => 'Honda',
+            'model' => 'XL 1000 Varadero',
+            'series' => 'SD01 / SD02',
+            'years' => 'podľa modelového radu',
+            'lead' => 'Stabilné a spoľahlivé riešenie pre pohodlné odstavenie motocykla a jednoduchšiu údržbu. Vyrobené na mieru pre Honda XL 1000 Varadero.',
+            'features' => ['Jednoduchšia údržba', 'Stabilné odstavenie', 'Odolná konštrukcia', 'Presné uchytenie'],
+            'note' => 'Honda XL 1000 Varadero sa vyrába v dvoch modelových radoch SD01 a SD02, ktoré majú odlišné vyhotovenie základného uchytenia.',
+            'notice' => 'Pri objednávke prosím uveďte modelový rad vašej motorky: SD01 alebo SD02.',
+        ],
     ],
     'drziaky-na-nadrz' => [
         'title' => 'Držiaky na nádrž',

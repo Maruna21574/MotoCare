@@ -127,6 +127,7 @@ if ($action === 'book' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $pickupAddress = $pickup ? cleanText($data['pickup_address'] ?? '', 240) : '';
     if ($pickup && $pickupAddress === '') apiResponse(['ok' => false, 'message' => 'Zadaj prosím adresu, kde máme motorku vyzdvihnúť.'], 422);
     if (!isset($services[$serviceId]) || !validDate($date) || !preg_match('/^\d{2}:\d{2}$/', $time) || $name === '' || $phone === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) apiResponse(['ok' => false, 'message' => 'Skontroluj prosím všetky povinné údaje.'], 422);
+    if (empty($data['terms'])) apiResponse(['ok' => false, 'message' => 'Na odoslanie rezervácie potrebujeme tvoj súhlas s obchodnými podmienkami.'], 422);
     if (empty($data['consent'])) apiResponse(['ok' => false, 'message' => 'Na odoslanie rezervácie potrebujeme tvoj súhlas so spracovaním údajov.'], 422);
     $payment = ($data['payment'] ?? '') === 'onsite' ? 'onsite' : 'online';
     if ($payment === 'online' && !stripeConfigured()) apiResponse(['ok' => false, 'message' => 'Platba kartou momentálne nie je dostupná. Vyber platbu na mieste alebo nám zavolaj.'], 503);
@@ -221,6 +222,7 @@ if ($action === 'shop_order' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $dic = cleanText($customer['dic'] ?? '', 40);
     $note = cleanText($customer['note'] ?? '', 500);
     if ($name === '' || $phone === '' || $address === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || $cart === []) apiResponse(['ok' => false, 'message' => 'Vyplň prosím kontaktné údaje a aspoň jeden produkt.'], 422);
+    if (empty($customer['terms'])) apiResponse(['ok' => false, 'message' => 'Na odoslanie objednávky potrebujeme tvoj súhlas s obchodnými podmienkami.'], 422);
     if (empty($customer['consent'])) apiResponse(['ok' => false, 'message' => 'Na odoslanie objednávky potrebujeme tvoj súhlas so spracovaním údajov.'], 422);
     $payment = ($customer['payment'] ?? '') === 'dobierka' ? 'dobierka' : 'online';
     if ($payment === 'online' && !stripeConfigured()) apiResponse(['ok' => false, 'message' => 'Platba kartou momentálne nie je dostupná. Vyber platbu na dobierku alebo nám zavolaj.'], 503);

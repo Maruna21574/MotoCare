@@ -425,6 +425,8 @@
             if (step !== 4) return;
             let redirecting = false;
             const consent = $('input[name="consent"]', bookForm);
+            const terms = $('input[name="terms"]', bookForm);
+            if (terms && !terms.reportValidity()) return;
             if (!consent.reportValidity()) return;
             const submit = $('button[type="submit"]', bookForm);
             submit.disabled = true;
@@ -487,6 +489,12 @@
     const contactForm = $('#contact-form');
     const contactMessage = $('#contact-message');
     if (contactForm) {
+        // Prefilled message (link "Mám záujem" from the shop): put the cursor at its end so the visitor can continue typing.
+        const contactText = $('textarea[name="message"]', contactForm);
+        if (contactText && contactText.value.trim() !== '' && location.hash === '#contact-form-wrap') {
+            contactText.focus({ preventScroll: true });
+            contactText.setSelectionRange(contactText.value.length, contactText.value.length);
+        }
         // Photo picker: keeps chosen files in an array so they can be previewed and removed one by one.
         const photoInput = $('[data-photo-input]', contactForm);
         const photoPreviews = $('[data-photo-previews]', contactForm);

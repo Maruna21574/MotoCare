@@ -2,7 +2,7 @@
 // sitemap.xml (served through a rewrite rule in .htaccess): public pages, services and products.
 require_once __DIR__ . '/inc/config.php';
 
-$paths = ['index.php', 'sluzby', 'galeria', 'o-nas', 'kontakt', 'rezervacia', 'shop', 'ramy'];
+$paths = ['index.php', 'sluzby', 'galeria', 'o-nas', 'kontakt', 'rezervacia', 'shop', 'ramy', 'obchodne-podmienky'];
 foreach (array_keys($frames) as $id) $paths[] = 'ramy?typ=' . rawurlencode((string) $id);
 foreach (array_keys($services) as $id) $paths[] = 'sluzba?slug=' . rawurlencode((string) $id);
 foreach (array_keys($products) as $id) $paths[] = 'produkt?slug=' . rawurlencode((string) $id);

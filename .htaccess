@@ -23,10 +23,10 @@ Options -Indexes
     RewriteCond %{REQUEST_URI} ^(.*)/index\.php$
     RewriteRule ^ %1/ [R=301,L]
     RewriteCond %{ENV:REDIRECT_STATUS} ^$
-    RewriteCond %{REQUEST_URI} ^(.*)/(sluzby|sluzba|galeria|o-nas|kontakt|rezervacia|shop|produkt|kosik|objednavka|ramy|gdpr|cookies)\.php$
+    RewriteCond %{REQUEST_URI} ^(.*)/(sluzby|sluzba|galeria|o-nas|kontakt|rezervacia|shop|produkt|kosik|objednavka|ramy|gdpr|cookies|obchodne-podmienky)\.php$
     RewriteRule ^ %1/%2 [R=301,L]
 
     # clean address -> the PHP file
     RewriteCond %{REQUEST_FILENAME}.php -f
-    RewriteRule ^(sluzby|sluzba|galeria|o-nas|kontakt|rezervacia|shop|produkt|kosik|objednavka|ramy|gdpr|cookies)$ $1.php [L]
+    RewriteRule ^(sluzby|sluzba|galeria|o-nas|kontakt|rezervacia|shop|produkt|kosik|objednavka|ramy|gdpr|cookies|obchodne-podmienky)$ $1.php [L]
 </IfModule>

@@ -114,6 +114,12 @@ return [
         'intro_text' => ['Úvod – text', 'text', 'Všetko vyrábame ručne a na mieru. Vyber si typ produktu, pozri si fotky a zisti, či vyrábame pre tvoju motorku. Ozveme sa ti s cenou a termínom výroby.'],
         'order_title' => ['Detail kategórie – nadpis výzvy', 'line', 'Vyrobíme na mieru pre tvoju motorku'],
         'order_text' => ['Detail kategórie – text výzvy', 'text', 'Každý kus vyrábame ručne podľa modelu motorky. Napíš nám značku, model a rok výroby a ozveme sa ti s cenou a termínom.'],
+        'detail_compat_title' => ['Produktová stránka – nadpis Kompatibilita', 'line', 'Kompatibilita'],
+        'detail_important_title' => ['Produktová stránka – nadpis Dôležité pri objednávke', 'line', 'Dôležité pri objednávke'],
+        'detail_help_text' => ['Produktová stránka – text pod upozornením', 'text', 'Ak si nie ste istí, ktorý model máte, kontaktujte nás. Radi vám pomôžeme s overením správneho vyhotovenia.'],
+        'detail_order_title' => ['Produktová stránka – nadpis Objednávka a cena', 'line', 'Objednávka a cena'],
+        'detail_order_text' => ['Produktová stránka – text Objednávka a cena', 'text', "Výroba prebieha na objednávku.\nPre aktuálnu cenu a termín dodania nás kontaktujte."],
+        'detail_order_button' => ['Produktová stránka – text tlačidla', 'line', 'Mám záujem o tento produkt'],
         'empty_text' => ['Kategória bez fotiek – text', 'text', 'Fotky pripravujeme. Ak máš záujem, napíš nám a pošleme ti ukážky.'],
         'cta_kicker' => ['Oranžový pás – malý nadpis', 'line', 'Máš špeciálnu požiadavku?'],
         'cta_title' => ['Oranžový pás – nadpis', 'line', 'Vyrobíme aj na mieru'],
@@ -166,6 +172,101 @@ return [
         'body' => ['Obsah', 'rich', "Ochrana vašich osobných údajov je pre nás dôležitá. Na tejto stránke sa dozviete, aké údaje spracúvame, prečo, ako dlho ich uchovávame a aké máte práva. Údaje spracúvame v súlade s Nariadením Európskeho parlamentu a Rady (EÚ) 2016/679 (GDPR) a zákonom č. 18/2018 Z. z. o ochrane osobných údajov.\n\n## Prevádzkovateľ\nPrevádzkovateľom osobných údajov je {company} (ďalej len „prevádzkovateľ“), ktorá prevádzkuje značku {name}.\n\nObchodné meno: {company_name}\nSídlo: {company_seat}\nIČO: {ico}\nDIČ: {dic}\nE-mail: {email}\nTelefón: {phone}\n\n## Aké údaje spracúvame\nSpracúvame iba údaje, ktoré nám sami poskytnete alebo ktoré vzniknú pri používaní webu:\n• Kontaktný formulár: meno, e-mail, telefónne číslo, text správy a fotografie, ak ich priložíte.\n• Rezervácia služby: meno, telefónne číslo, e-mail, vybraná služba, termín a údaje o motocykli.\n• Objednávka v e-shope: meno, doručovacia adresa, telefónne číslo, e-mail a obsah objednávky.
 • Platba: platbu online spracúva poskytovateľ platobnej brány. Nám sa uloží len stav platby a jej identifikátor, nie číslo karty.\n• Technické údaje: IP adresa a čas prístupu, ktoré používame na ochranu formulárov pred zneužitím a spamom.\n• Telefonická a e-mailová komunikácia: údaje, ktoré nám pri nej poskytnete.\n\n## Prečo údaje spracúvame a na akom právnom základe\n• Vybavenie vašej požiadavky, rezervácie alebo objednávky a súvisiaca komunikácia – plnenie zmluvy alebo opatrenia pred uzavretím zmluvy na vašu žiadosť (čl. 6 ods. 1 písm. b) GDPR).\n• Vedenie účtovníctva a plnenie daňových povinností – plnenie zákonnej povinnosti (čl. 6 ods. 1 písm. c) GDPR).\n• Ochrana webu pred zneužitím a spamom, ochrana našich právnych nárokov – oprávnený záujem prevádzkovateľa (čl. 6 ods. 1 písm. f) GDPR).\n• Odpoveď na všeobecnú otázku zaslanú cez formulár – oprávnený záujem alebo opatrenia pred uzavretím zmluvy (čl. 6 ods. 1 písm. b) a f) GDPR).\n\nPoskytnutie údajov je dobrovoľné. Bez základných údajov (napríklad kontaktu) však nemôžeme vašu požiadavku vybaviť.\n\n## Ako dlho údaje uchovávame\n• Správy z kontaktného formulára a súvisiaca komunikácia: po dobu potrebnú na vybavenie požiadavky, najviac 12 mesiacov od poslednej komunikácie.\n• Rezervácie: po dobu poskytnutia služby a následne najviac 12 mesiacov kvôli prípadným reklamáciám.\n• Objednávky a účtovné doklady: 10 rokov, ako ukladá zákon o účtovníctve.\n• Technické záznamy (IP adresa): najviac niekoľko dní až týždňov, len na ochranu formulárov.\n\nPo uplynutí týchto lehôt údaje vymažeme alebo anonymizujeme.\n\n## Komu údaje poskytujeme\nVaše údaje nepredávame a nevyužívame ich na automatizované rozhodovanie ani profilovanie. Sprístupniť ich môžeme iba nevyhnutným poskytovateľom, ktorí nám pomáhajú s prevádzkou:\n• poskytovateľovi webhostingu a e-mailových služieb,\n• prepravnej spoločnosti pri doručení objednávky,\n• účtovníkovi a daňovým poradcom,\n• orgánom verejnej moci, ak nám to ukladá zákon.\n\nVšetci sprostredkovatelia spracúvajú údaje len na základe zmluvy a v rozsahu nevyhnutnom na daný účel. Údaje neprenášame do krajín mimo Európskeho hospodárskeho priestoru.\n\n## Vaše práva\nAko dotknutá osoba máte právo:\n• na prístup k svojim osobným údajom a získanie ich kópie,\n• na opravu nesprávnych alebo doplnenie neúplných údajov,\n• na vymazanie údajov, ak na ich spracúvanie už nie je právny základ,\n• na obmedzenie spracúvania,\n• na prenosnosť údajov,\n• namietať proti spracúvaniu založenému na oprávnenom záujme,\n• odvolať súhlas, ak sa spracúvanie zakladá na súhlase – odvolanie nemá vplyv na zákonnosť spracúvania pred jeho odvolaním.\n\nSvoje práva môžete uplatniť e-mailom na {email} alebo písomne na adrese sídla. Odpovieme vám bez zbytočného odkladu, najneskôr do jedného mesiaca.\n\n## Cookies\nWeb používa iba nevyhnutné technické úložisko, napríklad na zapamätanie obsahu košíka. Podrobnosti nájdete na stránke Cookies.\n\n## Bezpečnosť údajov\nVaše údaje chránime primeranými technickými a organizačnými opatreniami, ktoré zodpovedajú rizikám spracúvania. Prístup k nim majú len oprávnené osoby.\n\n## Právo podať sťažnosť\nAk sa domnievate, že pri spracúvaní vašich údajov došlo k porušeniu právnych predpisov, môžete podať sťažnosť dozornému orgánu: Úrad na ochranu osobných údajov Slovenskej republiky, Budějovická 1998/3, 851 04 Bratislava, www.dataprotection.gov.sk.\n\n## Kontakt\nAk máte otázku k spracúvaniu osobných údajov, napíšte na {email} alebo zavolajte na {phone}.\n\nTieto zásady sú účinné od 7. novembra 2026."],
 
+    ]],
+    'vop' => ['label' => 'Obchodné podmienky', 'url' => 'obchodne-podmienky', 'fields' => [
+        'hero_title' => ['Hlavný nadpis', 'title', "Obchodné\n*podmienky.*"],
+        'hero_text' => ['Text pod nadpisom', 'text', 'Podmienky nákupu v e-shope a objednania služieb, odstúpenie od zmluvy a reklamácie.'],
+        'overline' => ['Malý nadpis', 'line', 'Obchodné podmienky a reklamačný poriadok'],
+        'title' => ['Nadpis', 'title', "Jasné pravidlá\n*pre nákup aj služby.*"],
+        'body' => ['Obsah', 'rich', <<<'VOP'
+Tieto obchodné podmienky upravujú vzťahy medzi predávajúcim a kupujúcim pri nákupe tovaru v e-shope a pri objednaní služieb (rezervácia) na webe {name}. Súčasťou podmienok je reklamačný poriadok a poučenie o práve na odstúpenie od zmluvy. Tovar a služby objednávate na základe týchto podmienok, ktoré sú pre vás záväzné po odoslaní objednávky alebo rezervácie.
+
+## 1. Predávajúci a poskytovateľ služieb
+Predávajúcim a poskytovateľom služieb je {company} (ďalej len „predávajúci“), ktorá prevádzkuje značku {name}.
+
+Obchodné meno: {company_name}
+Sídlo a miesto prevádzky: {company_seat}
+IČO: {ico}
+DIČ: {dic}
+DPH: {vat}
+E-mail: {email}
+Telefón: {phone}
+
+## 2. Základné ustanovenia
+• Spotrebiteľom je fyzická osoba, ktorá pri uzatváraní a plnení zmluvy nejedná v rámci predmetu svojej podnikateľskej činnosti. Na práva spotrebiteľa sa vzťahuje zákon č. 108/2024 Z. z. o ochrane spotrebiteľa a Občiansky zákonník.
+• Zmluva sa uzatvára v slovenskom jazyku. Komunikovať s nami môžete e-mailom, telefonicky alebo cez kontaktný formulár.
+• Informácie o tovare a službách na webe sú informatívne. Fotografie môžu byť ilustračné.
+
+## 3. Objednávka a uzavretie zmluvy
+• Objednávku vytvoríte odoslaním objednávkového formulára (e-shop) alebo potvrdením rezervácie (služby). Pred odoslaním môžete údaje skontrolovať a opraviť.
+• Po odoslaní vám zašleme potvrdenie na zadaný e-mail. Zmluva vzniká potvrdením objednávky predávajúcim. Pri platbe kartou vzniká zmluva zaplatením a potvrdením.
+• Predávajúci môže objednávku odmietnuť, ak tovar nie je dostupný, ak je v objednávke zjavná chyba alebo ak termín služby už nie je voľný. O tom vás bez zbytočného odkladu informuje a vrátí už zaplatenú sumu.
+
+## 4. Ceny a platba
+• Ceny sú uvedené v eurách. {vat_note}
+• Platiť môžete online kartou (platbu spracúva poskytovateľ platobnej brány Stripe, údaje o karte predávajúci nevidí a neukladá), pri tovare aj na dobierku pri prevzatí zásielky a pri službách aj na mieste v štúdiu, ak je táto možnosť pri rezervácii ponúknutá.
+• Pri rezervácii platenej kartou je termín držaný 30 minút. Ak sa platba v tomto čase nedokončí, termín sa uvoľní.
+• Tovar zostáva do úplného zaplatenia majetkom predávajúceho.
+
+## 5. Dodanie tovaru
+• Spôsob a cenu dopravy dohodneme po objednávke, ozveme sa vám e-mailom alebo telefonicky. Tovar si môžete prevziať aj osobne na adrese {address} po dohode.
+• Tovar vyrábaný na mieru (padacie rámy, stojany a ďalšie ochranné prvky) sa vyrába na objednávku. Cenu a termín výroby vám oznámime pred potvrdením objednávky.
+• Zásielku si pri prevzatí skontrolujte. Pri viditeľnom poškodení spíšte s dopravcom záznam o škode a informujte nás.
+
+## 6. Služby a rezervácia termínu
+• Rezervácia určuje deň a čas poskytnutia služby. Skutočný čas trvania závisí od stavu motorky a rozsahu prác.
+• Rezerváciu môžete zrušiť alebo zmeniť telefonicky alebo e-mailom. Ak ste za zrušenú rezerváciu zaplatili vopred, sumu vrátime rovnakým spôsobom, akým bola zaplatená.
+• Motorku prosím priveďte v dohodnutom čase. Pri meškaní sa môže rozsah prác upraviť alebo termín presunúť.
+
+## 7. Právo na odstúpenie od zmluvy (spotrebiteľ)
+• Ak nakupujete na diaľku (cez web), máte ako spotrebiteľ právo odstúpiť od zmluvy bez udania dôvodu do 14 dní od prevzatia tovaru. Pri zmluve o poskytnutí služby plynie lehota 14 dní od uzavretia zmluvy.
+• Odstúpiť môžete e-mailom na {email} alebo písomne na adrese {company_seat}. Môžete použiť vzorový formulár nižšie, nie je to však povinné. Stačí jasne vyjadriť, že od zmluvy odstupujete.
+• Tovar nám zašlite späť najneskôr do 14 dní od odstúpenia, nepoškodený a, ak je to možné, v pôvodnom obale. Náklady na vrátenie tovaru znáša spotrebiteľ.
+• Peniaze vrátime najneskôr do 14 dní od doručenia odstúpenia, rovnakým spôsobom, akým ste platili. Môžeme ich zadržať, kým tovar neprevezmeme alebo kým nepreukážete jeho odoslanie.
+• Za zníženie hodnoty tovaru nad rámec obvyklého vyskúšania zodpovedá spotrebiteľ.
+
+## 8. Kedy odstúpiť nemožno
+Právo na odstúpenie od zmluvy nemáte najmä pri:
+• tovare vyrobenom podľa požiadaviek spotrebiteľa alebo na mieru, napríklad padacie rámy, stojany a držiaky vyrobené pre konkrétny model motorky,
+• službe, ktorá bola úplne poskytnutá, ak sa jej poskytovanie začalo s vaším výslovným súhlasom a ste vedeli, že po úplnom poskytnutí služby právo na odstúpenie strácate,
+• tovare, ktorý bol po dodaní nenávratne zmiešaný s iným tovarom alebo spotrebovaný, a pri zapečatenom tovare z hygienických dôvodov, ak bol po dodaní porušený obal.
+Pri tovare vyrobenom na mieru vás na to upozorníme pred potvrdením objednávky.
+
+## 9. Zodpovednosť za vady a reklamácie
+• Predávajúci zodpovedá za to, že tovar je pri prevzatí bez vád. Na tovar zakúpený spotrebiteľom sa vzťahuje záručná doba 24 mesiacov od prevzatia. Pri podnikateľoch (kupujúcich na IČO) je záručná doba 12 mesiacov.
+• Záruka sa nevzťahuje na vady spôsobené nesprávnym používaním, mechanickým poškodením, nehodou či pádom motorky, neodbornou montážou alebo bežným opotrebením.
+• Služby vykonávame s odbornou starostlivosťou. Ak máte k vykonanej službe výhrady, ozvite sa nám čo najskôr, ideálne ihneď po prevzatí motorky, a vadu odstránime alebo dohodneme primerané riešenie.
+
+## 10. Ako reklamáciu uplatniť
+• Reklamáciu môžete uplatniť e-mailom na {email}, písomne na adrese {company_seat} alebo osobne po dohode. Uveďte číslo objednávky, popis vady a ako ju chcete vyriešiť. Pri vade pomôžu fotografie.
+• Po uplatnení reklamácie vám vydáme potvrdenie o jej uplatnení a o tom, ako ju vybavíme.
+• Reklamáciu vybavíme bez zbytočného odkladu, najneskôr do 30 dní od jej uplatnenia. Po tejto lehote máte právo odstúpiť od zmluvy alebo požadovať výmenu tovaru.
+• Spotrebiteľ má pri odstrániteľnej vade právo na bezplatné, včasné a riadne odstránenie vady alebo na výmenu tovaru. Pri neodstrániteľnej vade môže požadovať výmenu, primeranú zľavu z ceny alebo odstúpiť od zmluvy.
+• O výsledku reklamácie vás informujeme e-mailom, alebo ako si zvolíte.
+
+## 11. Alternatívne riešenie sporov
+Ak nie ste spokojný s tým, ako sme vybavili vašu reklamáciu alebo ste sa s nami nedohodli, môžete sa ako spotrebiteľ obrátiť na nás s prosbou o nápravu. Ak vám odpovieme zamietavo alebo neodpovieme do 30 dní, môžete podať návrh na alternatívne riešenie sporu subjektu alternatívneho riešenia sporov, napríklad Slovenskej obchodnej inšpekcii (www.soi.sk). Dozor nad dodržiavaním predpisov o ochrane spotrebiteľa vykonáva Slovenská obchodná inšpekcia.
+
+## 12. Ochrana osobných údajov
+Osobné údaje spracúvame iba v rozsahu nutnom na vybavenie objednávky alebo rezervácie. Podrobnosti nájdete na stránke Ochrana údajov.
+
+## 13. Záverečné ustanovenia
+• Zmluvné vzťahy sa riadia právnym poriadkom Slovenskej republiky. Práva spotrebiteľa vyplývajúce z kogentných ustanovení zostávajú nedotknuté.
+• Predávajúci môže tieto podmienky zmeniť. Pre objednávku platí znenie účinné v čase jej odoslania.
+
+## Vzorový formulár na odstúpenie od zmluvy
+Adresát: {company_name}, {company_seat}, e-mail: {email}
+
+Týmto oznamujem, že odstupujem od zmluvy o kúpe týchto tovarov / o poskytnutí týchto služieb:
+Dátum objednania / prevzatia:
+Číslo objednávky:
+Meno a priezvisko spotrebiteľa:
+Adresa spotrebiteľa:
+Číslo účtu (IBAN) na vrátenie platby:
+Dátum:
+Podpis (iba ak sa formulár zasiela v listinnej podobe):
+VOP
+        ],
     ]],
     'cookies' => ['label' => 'Cookies', 'url' => 'cookies', 'fields' => [
         'hero_title' => ['Hlavný nadpis', 'title', "Zásady\n*cookies.*"],

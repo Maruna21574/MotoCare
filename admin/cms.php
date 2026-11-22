@@ -165,11 +165,25 @@ if ($action === 'frame_save') {
         }
     }
     if ($id === '') $id = uniqueSlug($title, $items);
+    // Produktová stránka kategórie (tmavý vzhľad); bez názvu produktu sa zobrazí bežný detail kategórie.
+    $detail = [
+        'heading' => post('detail_heading', 80),
+        'name' => post('detail_name', 100),
+        'brand' => post('detail_brand', 60),
+        'model' => post('detail_model', 80),
+        'series' => post('detail_series', 80),
+        'years' => post('detail_years', 80),
+        'lead' => post('detail_lead', 400),
+        'features' => array_slice(linesToList(post('detail_features', 400)), 0, 4),
+        'note' => post('detail_note', 500),
+        'notice' => post('detail_notice', 300),
+    ];
     $items[$id] = array_replace($current, [
         'title' => $title,
         'text' => post('text', 400),
         'photos' => $photos,
         'hidden' => empty($_POST['visible']),
+        'detail' => $detail['name'] !== '' ? $detail : [],
     ]);
     saveOrFail($framesFile, $items, $back);
     flash('Kategória „' . $title . '“ je uložená' . ($added > 0 ? ', pridané fotky: ' . $added : '') . '.');
@@ -580,7 +594,8 @@ if ($page === 'frames') {
 if ($page === 'frame') {
     $id = cleanText($_GET['id'] ?? '', 60);
     if ($id !== '' && !isset($allFrames[$id])) { flash('Kategória sa nenašla.', 'error'); redirect('p=frames'); }
-    $category = array_replace(['title' => '', 'text' => '', 'photos' => [], 'hidden' => false], $allFrames[$id] ?? []);
+    $category = array_replace(['title' => '', 'text' => '', 'photos' => [], 'hidden' => false, 'detail' => []], $allFrames[$id] ?? []);
+    $detail = array_replace(['heading' => '', 'name' => '', 'brand' => '', 'model' => '', 'series' => '', 'years' => '', 'lead' => '', 'features' => [], 'note' => '', 'notice' => ''], (array) $category['detail']);
     $photos = array_values($category['photos']);
     $last = count($photos) - 1;
     renderHeader($id === '' ? 'Nová kategória' : $category['title'], 'frames');
@@ -596,6 +611,20 @@ if ($page === 'frame') {
             <label>Názov kategórie <small>napr. Padacie rámy</small><input type="text" name="title" value="<?= e($category['title']) ?>" maxlength="80" required></label>
             <label>Popis <small>zobrazí sa na karte a hore v detaile kategórie</small><textarea name="text" rows="3" maxlength="400"><?= e($category['text']) ?></textarea></label>
             <label class="check"><input type="checkbox" name="visible" value="1" <?= empty($category['hidden']) ? 'checked' : '' ?>> Zobrazovať kategóriu na webe</label>
+        </div>
+        <div class="card">
+            <h2>Produktová stránka <small>(voliteľné)</small></h2>
+            <p class="muted small">Ak vyplníš názov produktu, kategória sa na webe zobrazí v tmavom vzhľade s nadpisom, výhodami, kompatibilitou a tlačidlom „Mám záujem“. Ak ho necháš prázdny, zobrazí sa bežná galéria.</p>
+            <label>Názov produktu <small>napr. Honda XL 1000 Varadero</small><input type="text" name="detail_name" value="<?= e($detail['name']) ?>" maxlength="100"></label>
+            <label>Nadpis nad názvom <small>napr. Centrálny stojan</small><input type="text" name="detail_heading" value="<?= e($detail['heading']) ?>" maxlength="80"></label>
+            <label>Úvodný text <small>krátky popis pod nadpisom</small><textarea name="detail_lead" rows="3" maxlength="400"><?= e($detail['lead']) ?></textarea></label>
+            <label>Výhody <small>každá na nový riadok, zobrazia sa najviac štyri s ikonami</small><textarea name="detail_features" rows="4" maxlength="400"><?= e(implode("\n", (array) $detail['features'])) ?></textarea></label>
+            <label>Značka<input type="text" name="detail_brand" value="<?= e($detail['brand']) ?>" maxlength="60"></label>
+            <label>Model<input type="text" name="detail_model" value="<?= e($detail['model']) ?>" maxlength="80"></label>
+            <label>Modelové rady <small>napr. SD01 / SD02, nechaj prázdne ak nie sú</small><input type="text" name="detail_series" value="<?= e($detail['series']) ?>" maxlength="80"></label>
+            <label>Roky výroby <small>napr. 1999 – 2012</small><input type="text" name="detail_years" value="<?= e($detail['years']) ?>" maxlength="80"></label>
+            <label>Dôležité pri objednávke – vysvetlenie<textarea name="detail_note" rows="3" maxlength="500"><?= e($detail['note']) ?></textarea></label>
+            <label>Oranžové upozornenie <small>čo musí zákazník uviesť pri objednávke</small><textarea name="detail_notice" rows="2" maxlength="300"><?= e($detail['notice']) ?></textarea></label>
         </div>
         <div class="card">
             <h2>Pridať fotky</h2>

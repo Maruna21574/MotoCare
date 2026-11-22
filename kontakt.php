@@ -5,7 +5,7 @@ $activePage = 'kontakt';
 include __DIR__ . '/inc/header.php';
 $phoneHref = phoneHref();
 $prefillModel = cleanText($_GET['model'] ?? '', 120);
-$prefillMessage = $prefillModel !== '' ? 'Mám záujem o: ' . $prefillModel . "\n\nModel motorky a rok výroby: " : '';
+$prefillMessage = $prefillModel !== '' ? 'Mám záujem o: ' . $prefillModel . "\nModel motorky a rok výroby: " : '';
 ?>
 <?php $hero = ['title' => t('contact.hero_title'), 'text' => textRaw('contact.hero_text'), 'crumbs' => [['Kontakt', null]], 'video' => '4922588']; include __DIR__ . '/inc/page-hero.php'; ?>
 

@@ -42,7 +42,7 @@ if (is_file($framesFile)) {
 } else {
     $allFrames = [];
     foreach (require __DIR__ . '/frames.php' as $key => $category) {
-        $allFrames[$key] = ['title' => $category['title'], 'text' => $category['text'], 'photos' => frameFolderPhotos($key), 'hidden' => false];
+        $allFrames[$key] = ['title' => $category['title'], 'text' => $category['text'], 'photos' => frameFolderPhotos($key), 'hidden' => false, 'detail' => $category['detail'] ?? []];
     }
 }
 $frames = array_filter($allFrames, static fn (array $category): bool => empty($category['hidden']));
@@ -173,6 +173,8 @@ function textPlaceholders(string $html): string
         '{cookie_settings}' => '<button type="button" class="button button--orange" data-cookie-settings>Nastavenia súhlasu</button>',
         '{ico}' => e((string) ($site['company_ico'] ?? '')),
         '{dic}' => e((string) ($site['company_dic'] ?? '')),
+        '{vat}' => e((string) ($site['company_vat'] ?? '')),
+        '{vat_note}' => stripos((string) ($site['company_vat'] ?? ''), 'nie je') !== false ? 'Predávajúci nie je platiteľom DPH, uvedené ceny sú konečné.' : 'Uvedené ceny sú vrátane DPH.',
     ]);
 }
 

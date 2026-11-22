@@ -72,6 +72,11 @@
         <h2 class="book-title">Skontroluj rezerváciu</h2>
         <dl class="book-summary" id="book-summary"></dl>
         <label class="book-option book-consent">
+            <input type="checkbox" name="terms" value="1" required>
+            <span class="book-option-box" aria-hidden="true"></span>
+            <span class="book-option-text">Oboznámil(a) som sa s <a href="obchodne-podmienky" target="_blank">obchodnými podmienkami</a> a súhlasím s nimi.</span>
+        </label>
+        <label class="book-option book-consent">
             <input type="checkbox" name="consent" value="1" required>
             <span class="book-option-box" aria-hidden="true"></span>
             <span class="book-option-text">Súhlasím so <a href="gdpr" target="_blank">spracovaním osobných údajov</a> za účelom vybavenia rezervácie.</span>

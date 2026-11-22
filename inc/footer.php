@@ -25,7 +25,11 @@
                 <?php foreach (openingHoursGroups() as $group): ?><p class="site-foot-hours"><span><?= e($group['label']) ?></span><b><?= e($group['value']) ?></b></p><?php endforeach; ?>
             </div>
         </div>
-        <div class="container site-foot-bottom"><span>© <?= date('Y') ?> <?= e($site['name']) ?></span><nav aria-label="Právne informácie"><a href="gdpr">Ochrana údajov</a><a href="cookies">Cookies</a></nav></div>
+        <div class="container site-foot-company">
+            <p><?= e(implode(' · ', array_map(static fn (array $row): string => $row[0] . ': ' . $row[1], array_filter(companyDetails(), static fn (array $row): bool => in_array($row[0], ['Obchodné meno', 'Sídlo', 'IČO', 'DIČ', 'DPH'], true))))) ?></p>
+            <?php foreach (companyDetails() as $row): if ($row[0] === 'Zápis v registri'): ?><p><?= e($row[1]) ?></p><?php endif; endforeach; ?>
+        </div>
+        <div class="container site-foot-bottom"><span>© <?= date('Y') ?> <?= e($site['name']) ?></span><nav aria-label="Právne informácie"><a href="obchodne-podmienky">Obchodné podmienky</a><a href="gdpr">Ochrana údajov</a><a href="cookies">Cookies</a></nav></div>
     </footer>
     <a class="scroll-to-top" href="#top" aria-label="Späť hore"><span aria-hidden="true">↑</span></a>
     <div class="toast" id="toast" role="status"></div>
